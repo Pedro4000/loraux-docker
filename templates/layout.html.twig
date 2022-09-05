@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+
+    <nav class="navbar">
+        <ul>
+            <li><a href={{ path('index') }} id='landing_link'>Culture Club</a></li>
+            <li><a href={{ path('movies') }} id='signup_link'>Culture Films</a></li>
+            <li><a href={{ path('sign_up') }} id='signup_link'>Créer un profil</a></li>
+        </ul>
+    </nav>
+    <main>
+        {% block page_content %}
+        {% endblock %}
+    </main>
+
+{% endblock %}
+

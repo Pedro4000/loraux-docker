@@ -1,0 +1,46 @@
+{% extends 'layout.html.twig' %}
+
+{% block page_content %}
+
+    <section class="discogs-research-section">
+        <form method="post" >
+            <label for="query">Votre recherche</label>
+            <input type="text" id="query-discogs" name="query-discogs">
+            <button type="submit btn btn-light" id="discogs-query-research-button">Cherche ma frye</button>
+            <button type="reset btn btn-light" id="discogs-query-cancel-button">Annule</button>
+        </form>
+    </section>
+    {% if img and responseContents %}
+    <section class="discogs-response-section">
+        <div class="discogs-result-display">
+            <div class="stay-put">
+                <img src="{{ img }}" onerror="this.src='{{ asset('build/images/no_image.jpg') }}'" class="research-logo" data-item-type="{{ responseContents['results'][0]['type']}}"
+                     data-item-id="{{ responseContents['results'][0]['id']}}" >
+            </div>
+
+            <p class="dj-or-label">Juste pour info c'est un
+                    {% if responseContents['results'][0]['type'] == 'artist'%}
+                        artiste
+                    {% else %}
+                        {{ responseContents['results'][0]['type'] }}
+                    {% endif %}</p>
+                <p>Alors c'est ça ?</p>
+                {% if guzzleException %}
+                    <p>{{ guzzleException }}</p>
+                {% endif %}
+        </div>
+
+         <div class="discogs-query-control-pannel" data-pages="{{ discogsQueryInfos.pages }}" data-elements="{{ discogsQueryInfos.totalLength }}">
+             <button type="button" class="good-answer-ma-man btn btn-light">Yesss c ca</button>
+             <button type="button" class='previous-research-button discogs-research-button btn btn-light'><img class="previous-discogs-image" src="{{ asset('build/icons/keyboard_arrow_left-24px.svg') }}"></button>
+             <button type="button" class='next-research-button discogs-research-button btn btn-light'><img class="next-discogs-image" src="{{ asset('build/icons/keyboard_arrow_right-24px.svg') }}"> </button>
+         </div>
+        <div class="video-section">
+        </div>
+        <div class="hidden-links-div">
+
+        </div>
+    </section>
+    {% endif %}
+
+{% endblock %}
