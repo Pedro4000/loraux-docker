@@ -17,6 +17,7 @@
                 <img src="{{ img }}" onerror="this.src='{{ asset('build/images/no_image.jpg') }}'" class="research-logo" data-item-type="{{ responseContents['results'][0]['type']}}"
                      data-item-id="{{ responseContents['results'][0]['id']}}" >
             </div>
+            
 
             <p class="dj-or-label">Juste pour info c'est un
                     {% if responseContents['results'][0]['type'] == 'artist'%}
@@ -32,8 +33,8 @@
 
          <div class="discogs-query-control-pannel" data-pages="{{ discogsQueryInfos.pages }}" data-elements="{{ discogsQueryInfos.totalLength }}">
              <button type="button" class="good-answer-ma-man btn btn-light">Yesss c ca</button>
-             <button type="button" class='previous-research-button discogs-research-button btn btn-light'><img class="previous-discogs-image" src="{{ asset('build/icons/keyboard_arrow_left-24px.svg') }}"></button>
-             <button type="button" class='next-research-button discogs-research-button btn btn-light'><img class="next-discogs-image" src="{{ asset('build/icons/keyboard_arrow_right-24px.svg') }}"> </button>
+             <button type="button" class='previous-research-button discogs-research-button btn btn-light'><img class="previous-discogs-image" src="{{ asset('images/keyboard_arrow_left-24px.svg') }}"></button>
+             <button type="button" class='next-research-button discogs-research-button btn btn-light'><img class="next-discogs-image" src="{{ asset('images/keyboard_arrow_right-24px.svg') }}"> </button>
          </div>
         <div class="video-section">
         </div>
@@ -41,6 +42,10 @@
 
         </div>
     </section>
+    <script>
+        //console.log($('discogs-query-control-pannel'));
+        console.log('blabla');
+    </script>
     {% endif %}
 
 {% endblock %}

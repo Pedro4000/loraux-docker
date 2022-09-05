@@ -3,14 +3,25 @@
 {% block content %}
 
     <nav class="navbar">
-        <ul>
+        <ul class="mt-0 w-100 d-flex justify-content-between mx-4">
             <li><a href={{ path('index') }} id='landing_link'>Culture Club</a></li>
-            <li><a href={{ path('movies') }} id='signup_link'>Culture Films</a></li>
             <li><a href={{ path('sign_up') }} id='signup_link'>Créer un profil</a></li>
         </ul>
     </nav>
+        {% block sidebar %}
+           <div id="sidebar">
+                <ul>
+                    <li>Musique</li>
+                    <li>Films</li>
+                    <li>Livres</li>
+                </ul>
+           </div>
+        {% endblock %}
     <main>
+
+
         {% block page_content %}
+            
         {% endblock %}
     </main>
 

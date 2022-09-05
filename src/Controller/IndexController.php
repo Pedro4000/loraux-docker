@@ -11,7 +11,7 @@ use Google_Service_Calendar;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\{Request, JsonResponse};
+use Symfony\Component\HttpFoundation\{RequestStack, Request, JsonResponse};
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -33,9 +33,10 @@ class IndexController extends AbstractController
 
     
     #[Route('/', name: 'index')]
-    public function indexAction(Request $request, ManagerRegistry $doctrine): Response
+    public function indexAction(Request $request, RequestStack $requestStack, ManagerRegistry $doctrine): Response
     {
         $client = new Client();
+        $session = $requestStack->getSession();
         $consumerKey = $this->getParameter('discogs_consumer_key');
         $consumerSecret = $this->getParameter('discogs_consumer_secret');
         $baseDiscogsApi = 'https://api.discogs.com/';
@@ -47,12 +48,9 @@ class IndexController extends AbstractController
         $discogsCredentials = 'key='.$consumerKey.'&secret='.$consumerSecret;
         /* auth of type "https://api.discogs.com/database/search?q=Nirvana&key=foo123&secret=bar456" */
 
-
-        $response = $client->get('https://api.discogs.com/releases/249504');
-
         // PREMIERE RECHERCHE AFIN DE TROUVER LOBJET VOULU
         if($request->get('query-discogs')){
-            $this->session->set('discogsQueryResult','');
+            $session->set('discogsQueryResult','');
             $queryString = $request->get('query-discogs');
             $res = $client->request('GET', $baseDiscogsApi.'/database/search?q='.$queryString.'&'.$discogsCredentials);
             $responseContents = json_decode($res->getBody()->getContents(), true);
@@ -60,7 +58,7 @@ class IndexController extends AbstractController
             $recResults = $responseContents['results'];
             $recResultsLength = count($responseContents['results']);
             $imgRecSpec = $responseContents['results'][0]['cover_image'];
-            $this->session->set('discogsQueryResult',$responseContents);
+            $session->set('discogsQueryResult',$responseContents);
 
             $discogsQueryInfos=
                 [
