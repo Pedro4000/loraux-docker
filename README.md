@@ -11,6 +11,16 @@ Un remake de okcoco avec tout un tas de features en plus
 
 A faire pour installer depuis une autre machine.
 
+1. Installer docker desktop https://docs.docker.com/desktop/install/ubuntu/ ne pas oublier (https://docs.docker.com/engine/install/ubuntu/#set-up-the-repository), ne pas oublier non plus https://docs.docker.com/engine/install/linux-postinstall/ pour ajouter notre user au docker group, pour éviter les problèmes de droits lors d'executions de commandes
+sudo dpkg -i au lieu de sudo apt install dans la doc pour bien installer le deb file et non pas le package apt
+2. ```git clone https://docs.docker.com/engine/install/ubuntu/#set-up-the-repository```
+Enlever les auto scripts dans composer.json on les remettra après le build
+3. ```docker compose build --pull --no-cache```
+Problèmes possibles : problème d'authorisation (dans in ~/.docker/config.json remplacer credsStore par credStore)
+4. ```docker compose up -d``` 
+5. ```docker exec -it nom_du_conteneur_ou_id bash``` voir /bin/sh si il trouve pas bash dans les variables d'environement
+
+
 # TODO
 
 1. Reprendre processus d'authentification
