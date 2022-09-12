@@ -7,13 +7,13 @@ p{
   height : 100vh;
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: start;
   justify-content: center;
 }
 .signInSection{
   display :flex;
   justify-content: space-between;
-  width: 50%;
+  width: 80%;
   .signInFormSection {
     width: 510px;
     background-color : aliceblue;

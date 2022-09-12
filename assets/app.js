@@ -6,8 +6,9 @@
  */
 
 // any CSS you import will output into a single css file (app.css in this case)
-
 import $ from 'jquery';
+
+import './js/discogs.js'
 
 import './styles/app.css';
 import './css/app.scss';
@@ -16,4 +17,3 @@ import './css/layout.scss';
 import './css/signin.scss';
 // import $ from 'jquery';
 // start the Stimulus application
-import './bootstrap';

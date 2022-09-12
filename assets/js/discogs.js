@@ -1,4 +1,5 @@
 $(document).ready(function(){
+    console.log('ok');
     const howManyTabs = 5;
     const discogsArrayLenght = $('.discogs-query-control-pannel').data('elements')-1;
     let i = 0;
@@ -48,6 +49,8 @@ $(document).ready(function(){
     });
 
     $('.good-answer-ma-man').on('click',function(e){
+        throw new Error("my error message");
+
         let id;
         let type;
         let i;

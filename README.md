@@ -23,12 +23,17 @@ Problèmes possibles : problème d'authorisation (dans in ~/.docker/config.json 
 
 # TODO
 
+0. 
+    1. Ajouter phpmyadmin (OK)
+    2. Changer les annotations par des attributs
+    2. Reprendre API discogs et index musique
 1. Reprendre processus d'authentification
 2. gérer les differents codes d'erreurs pour toutes les request curl/guzzle (si pb connexion ac api)
- a. Pour google et youtube data api gérer les maximums de request
- b. mettre en place cron tous les matins pour avoir un minimum de contenu
+    1. Pour google et youtube data api gérer les maximums de request
+    2. mettre en place cron tous les matins pour avoir un minimum de contenu
 3. Faire les formulaires et validateurs
 4. Reprendre les migrations pour la bdd postgresql de docker
 5. Reprendre les anciennes routes en annotation et les changer en attributs
 6. chercher API pour les livres
 7. ajouter sections favorites
+8. Voir doc aws et mettre en ligne

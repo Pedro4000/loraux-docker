@@ -24,11 +24,14 @@ class IndexController extends AbstractController
     public $em;
 
 
-    public function __construct (Google_Client $client, ParameterBagInterface $params, DiscogsService $discogsService)
+    public function __construct (Google_Client $client, ParameterBagInterface $params, DiscogsService $discogsService, RequestStack $requestStack)
     {
         $this->client = $client;
         $this->params = $params;
         $this->discogsService = $discogsService;
+        $this->requestStack = $requestStack;
+        $this->session = $this->requestStack->getSession();
+
     }
 
     
@@ -46,32 +49,31 @@ class IndexController extends AbstractController
         $discogsQueryInfos = [];
         $guzzleException='';
         $discogsCredentials = 'key='.$consumerKey.'&secret='.$consumerSecret;
+
         /* auth of type "https://api.discogs.com/database/search?q=Nirvana&key=foo123&secret=bar456" */
 
         // PREMIERE RECHERCHE AFIN DE TROUVER LOBJET VOULU
-        if($request->get('query-discogs')){
+        if ($request->get('query-discogs')) {
             $session->set('discogsQueryResult','');
             $queryString = $request->get('query-discogs');
             $res = $client->request('GET', $baseDiscogsApi.'/database/search?q='.$queryString.'&'.$discogsCredentials);
             $responseContents = json_decode($res->getBody()->getContents(), true);
-            $pagesOfDiscogsResponse = $responseContents['pagination']['pages'];
-            $recResults = $responseContents['results'];
-            $recResultsLength = count($responseContents['results']);
-            $imgRecSpec = $responseContents['results'][0]['cover_image'];
-            $session->set('discogsQueryResult',$responseContents);
 
-            $discogsQueryInfos=
-                [
-                    'pages'=>$pagesOfDiscogsResponse,
-                    'totalLength' => $recResultsLength
-                ];
+            if (!empty($responseContents['results'])) {
+                $imgRecSpec = $responseContents['results'][0]['cover_image'];
+                $session->set('discogsQueryResult',$responseContents);
+                $discogsQueryInfos =
+                    [
+                        'pages' => $responseContents['pagination']['pages'],
+                        'totalLength' => count($responseContents['results']),
+                    ];
+            };
         }
-
 
         $discogsAuthUri = 'https://api.discogs.com/oauth/request_token';
         $apiEndPOint = 'https://api.discogs.com/database/search?q=Nirvana&'.$discogsCredentials;
 
-/*        if($pagesOfDiscogsResponse) {
+/*        if ($pagesOfDiscogsResponse) {
             $secondPageResponse = $client->request('GET', 'https://api.discogs.com/database/search?q='.$queryString.'&'.$discogsCredentials.'&page=2');
             $secondPagContent = json_decode($secondPageResponse->getBody()->getContents());
         }*/
@@ -86,35 +88,22 @@ class IndexController extends AbstractController
 
     }
 
-    /**
-     * @Route("/ajaxLoadVideos", name="ajaxLoadVideos")
-     * @param Request $request
-     * @param int $itemId
-     * @param string $itemType
-     * @return JsonResponse
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
-    public function ajaxLoadVideosAction(Request $request){
+    #[Route('/ajaxLoadVideos', name: 'ajaxLoadVideos')]
+    public function ajaxLoadVideosAction(Request $request, ManagerRegistry $doctrine)
 
-
+    {
         $id = $request->query->get('id');
+        $em = $doctrine->getManager();
         $type = $request->query->get('type');
         $consumerKey = $this->getParameter('app.discogs_consumer_key');
         $consumerSecret = $this->getParameter('app.discogs_consumer_secret');
         $baseDiscogsApi = 'https://api.discogs.com/';
         $recArray = [];
         $videosArray = [];
-        $artists = '';
         $guzzleException= '';
         $discogsCredentials = 'key='.$consumerKey.'&secret='.$consumerSecret;
-        $responseContents=[];
         $videosArray['releases'] = [];
         $this->session->set('videosToPutInPlaylist','');
-        $em =$this->getDoctrine()->getManager();
-
-
-
-
 
         // SI ON A DU CONTENU ALORS ON VA LISTER LES RELEASE PAR TYPE DOBJET
         if($type == 'label') {
@@ -125,24 +114,24 @@ class IndexController extends AbstractController
             $labelInfos = json_decode($labelInfos->getBody()->getContents(),true);
             $recArray = json_decode($resSpec->getBody()->getContents(),true);
 
-            if(!$this->getDoctrine()
+            if (!$this->getDoctrine()
                 ->getRepository(Label::class)
-                ->findOneBy([ 'discogsId' => $labelInfos['id']])){
+                ->findOneBy([ 'discogsId' => $labelInfos['id']])) {
                 $this->discogsService->createNewLabel($labelInfos['id'], $labelInfos['name']);
             };
             $labelFromDb = $this->getDoctrine()->getRepository(Label::class)->findOneBy([ 'discogsId' => $labelInfos['id']]);
 
         }
-        elseif($type == 'artist') {
+        elseif ($type == 'artist') {
             $client = new Client();
             $resSpec = $client->request('GET', $baseDiscogsApi.'artists/'.$id.'/releases?'.$discogsCredentials);
             $artistInfos = $client->request('GET', $baseDiscogsApi.'artists/'.$id.'?'.$discogsCredentials);
             $artistInfos = json_decode($artistInfos->getBody()->getContents(),true);
             $recArray = json_decode($resSpec->getBody()->getContents(),true);
 
-            if(!$this->getDoctrine()
+            if (!$this->getDoctrine()
                 ->getRepository(Artist::class)
-                ->findOneBy([ 'discogsId' => $artistInfos['id']])){
+                ->findOneBy([ 'discogsId' => $artistInfos['id']])) {
                 $newArtist = new Artist();
                 $newArtist->setName($artistInfos['name']);
                 $newArtist->setDiscogsId($artistInfos['id']);
@@ -154,11 +143,9 @@ class IndexController extends AbstractController
 
 
 
-
-
         $now = new \DateTime();
-        if($labelFromDb->getLastTimeFullyScraped()){
-            if($now->diff($labelFromDb->getLastTimeFullyScraped())->days < 85){
+        if ($labelFromDb->getLastTimeFullyScraped()) {
+            if ($now->diff($labelFromDb->getLastTimeFullyScraped())->days < 85) {
                 $allReleases  = $labelFromDb->getReleases();
                 foreach($allReleases as $release){
                     foreach ($release->getVideos() as $video){
@@ -173,7 +160,7 @@ class IndexController extends AbstractController
 
 
         // ICI ON VIENT CHERCHER LES VIDEOS UNES A UNES
-        if(!empty($recArray)) {
+        if (!empty($recArray)) {
             for($j=1; $j<= $recArray['pagination']['pages']; $j++){
                 if($j<>1){
                     $resSpec = $client->request('GET', $baseDiscogsApi.'labels/'.$id.'/releases?'.$discogsCredentials.'&page='.$j.'&per_page=50');
@@ -255,7 +242,7 @@ class IndexController extends AbstractController
                                 $releaseArtist = $this->getDoctrine()->getRepository(Artist::class)
                                     ->findOneBy(['discogsId' => $releaseInfos['artists'][0]['id']]);
                                 //puis la release
-                                if(!$this->getDoctrine()->getRepository(Release::class)->findOneBy([ 'discogsId' => $releaseInfos['id']])
+                                if (!$this->getDoctrine()->getRepository(Release::class)->findOneBy([ 'discogsId' => $releaseInfos['id']])
                                     || $this->getDoctrine()->getRepository(Release::class)->findOneBy([ 'discogsId' => $releaseInfos['id']])->getTracks()->isEmpty()
                                 ){
                                     $releaseInfos = $this->discogsService->setArrayKeyToNullIfNonExistent($releaseInfos);
@@ -290,28 +277,16 @@ class IndexController extends AbstractController
 
         }
 
-        if($recArray['pagination']['items']==count($labelFromDb->getReleases())){
+        if ($recArray['pagination']['items']==count($labelFromDb->getReleases())) {
             $now = new \Datetime();
             $labelFromDb->setLastTimeFullyScraped($now);
             $em->persist($labelFromDb);
             $em->flush();
         }
 
-
         return new JsonResponse([$guzzleException, $videosArray]);
-
     }
 
-    /**
-     * @Route("/ajaxImage", name="ajaxImage")
-     * @param Request $request
-     */
-    public function ajaxImageAction(Request $request){
-
-        $queryResults = $this->session->get('discogsQueryResult');
-        return new JsonResponse($queryResults);
-
-    }
 
     /**
      * @Route("/sign_up", name="sign_up")
@@ -322,11 +297,11 @@ class IndexController extends AbstractController
      * @param ParameterBagInterface $params
      * @return Response
      */
-    public function signUpAction(Request $request, MailToNewMember $mailToNewMember, MailerInterface $mailerInterface, CalendarService $calendarService)
+    public function signUpAction(Request $request, MailToNewMember $mailToNewMember, MailerInterface $mailerInterface, CalendarService $calendarService, ManagerRegistry $doctrine)
     {
 //        $mailToNewMember->sendMailToNewMember($mailerInterface);
 
-        $em = $this->getDoctrine()->getManager();
+        $em = $doctrine->getManager();
         $newUser = new User();
         $userForm = $this->createForm(UserType::class, $newUser, [
             'action' => $this->generateUrl('sign_up'),

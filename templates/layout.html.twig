@@ -3,21 +3,24 @@
 {% block content %}
 
     <nav class="navbar">
-        <ul class="mt-0 w-100 d-flex justify-content-between mx-4">
-            <li><a href={{ path('index') }} id='landing_link'>Culture Club</a></li>
-            <li><a href={{ path('sign_up') }} id='signup_link'>Créer un profil</a></li>
+        <ul class="w-100 d-flex justify-content-between mx-4">
+                <li><a href={{ path('index') }} id='landing_link'>Loraux</a></li>
+            <div id="" class="d-inline-block">
+                <li><a href={{ path('sign_up') }} id='signup_link'>Créer un profil</a></li>
+                {#<li><a href={{ path('sign_in') }} id='sign_in'>Se connecter</a></li>#}
+            </div>
         </ul>
     </nav>
+    <main class="p-0 d-flex">
         {% block sidebar %}
-           <div id="sidebar">
-                <ul>
-                    <li>Musique</li>
-                    <li>Films</li>
-                    <li>Livres</li>
+           <div id="sidebar" class="min-vh-100 w-15 float-left p-4 b-1 border border-right border-darek">
+                <ul class="p-0">
+                    <li class="mt-2 btn btn-outline-dark" style="border:none !important">Musique</li>
+                    <li class="mt-2 btn btn-outline-dark" style="border:none !important">Films</li>
+                    <li class="mt-2 btn btn-outline-dark" style="border:none !important">Livres</li>
                 </ul>
            </div>
         {% endblock %}
-    <main>
 
 
         {% block page_content %}

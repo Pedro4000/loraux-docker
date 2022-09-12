@@ -1,8 +1,16 @@
 @import "~bootstrap/scss/bootstrap";
 
+
+@font-face {
+    font-family: Basalte;
+    src: url(/public/fonts/degheest-types-master/fonts/webfonts/Basalte-Fond.woff) format("woff");
+    src: url(/public/fonts/degheest-types-master/fonts/webfonts/Basalte-Fond.woff2) format("woff2");
+}
+
+
 *{
     box-sizing: border-box;
-
+    font-family: Basalte, Open-sans;
 }
 
 img{
@@ -18,10 +26,13 @@ body{
     margin: 0;
     background-color: #eee;
     line-height: 1.5em;
-    font-family: 'Montserrat', sans-serif;
     /*
     background-color: blanchedalmond;
     */
+}
+
+ul{  
+    list-style-type: none;
 }
 
 p{

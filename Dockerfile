@@ -103,7 +103,7 @@ RUN set -eux; \
     if [ -f composer.json ]; then \
 		composer install --prefer-dist --no-dev --no-autoloader --no-scripts --no-progress; \
 		composer clear-cache; \
-    fi
+    fi 
 
 # copy sources
 COPY . .
@@ -117,6 +117,10 @@ RUN set -eux; \
 		composer run-script --no-dev post-install-cmd; \
 		chmod +x bin/console; sync; \
     fi
+
+RUN apk add --update nodejs npm && \
+    npm install \
+	npm run build
 
 # Dev image
 FROM app_php AS app_php_dev
@@ -139,6 +143,7 @@ RUN set -eux; \
 RUN rm -f .env.local.php
 
 # Build Caddy with the Mercure and Vulcain modules
+
 FROM caddy:${CADDY_VERSION}-builder-alpine AS app_caddy_builder
 
 RUN xcaddy build \

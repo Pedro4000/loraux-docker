@@ -33,7 +33,8 @@ class CalendarService extends AbstractController
     public function __construct(RequestStack $requestStack, UrlGeneratorInterface $router)
     {
 
-        $this->session = $session;
+        $this->requestStack = $requestStack;
+        $this->session = $this->requestStack->getSession();
         $this->router = $router;
         /*        dump(4);die;
         $client = new Google_Client();

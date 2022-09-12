@@ -31,6 +31,7 @@ use GuzzleHttp\Command\Guzzle\GuzzleClient;
 use Guzzle\Http\Exception\ClientErrorResponseException;
 use GuzzleHttp\Exception\ClientException;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 
 
@@ -40,11 +41,12 @@ class MoviesController extends AbstractController
     private $client;
     public $em;
 
-    public function __construct (Google_Client $client, ParameterBagInterface $params, DiscogsService $discogsService)
+    public function __construct (Google_Client $client, ParameterBagInterface $params, DiscogsService $discogsService, RequestStack $requestStack)
     {
         $this->client = $client;
         $this->params = $params;
-        $this->session = $session;
+        $this->requestStack = $requestStack;
+        $this->session = $this->requestStack->getSession();
         $this->discogsService = $discogsService;
     }
 
@@ -55,7 +57,7 @@ class MoviesController extends AbstractController
      */
     public function MoviesAction(Request $request)
     {
-
+        $session = $this->requestStack->getSession();
     }
 
 }

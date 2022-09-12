@@ -53,7 +53,7 @@ class YoutubeController extends AbstractController
     public function createYoutubePlaylistAction(Request $request)
     {
         $client = new Google_Client();
-        $client->setApplicationName('Culture Club');
+        $client->setApplicationName('Loraux');
         $guzzleClient = new \GuzzleHttp\Client(array('curl' => array(CURLOPT_SSL_VERIFYPEER => false)));
         $client->setHttpClient($guzzleClient);
         $client->setAuthConfig('credentials.json');
