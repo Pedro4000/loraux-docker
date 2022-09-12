@@ -18,11 +18,10 @@ Enlever les auto scripts dans composer.json on les remettra après le build
 3. ```docker compose build --pull --no-cache```
 Problèmes possibles : problème d'authorisation (dans in ~/.docker/config.json remplacer credsStore par credStore)
 4. ```docker compose up -d``` 
-5. ```docker exec -it nom_du_conteneur_ou_id bash``` voir /bin/sh si il trouve pas bash dans les variables d'environement
+5. ```docker exec -it nom_du_conteneur_ou_id /bin/sh``` voir /bin/sh si il trouve pas bash dans les variables d'environement
 
 
 # TODO
-
 0. 
     1. Ajouter phpmyadmin (OK)
     2. Changer les annotations par des attributs
