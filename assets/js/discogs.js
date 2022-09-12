@@ -1,5 +1,4 @@
 $(document).ready(function(){
-    console.log('ok');
     const howManyTabs = 5;
     const discogsArrayLenght = $('.discogs-query-control-pannel').data('elements')-1;
     let i = 0;
@@ -9,43 +8,29 @@ $(document).ready(function(){
     let direction;
     let gotWholeResult = false;
     let videosLinks = [];
+
+    var discogsResponse = $('#discogs-data-div').data('response_discogs').results;
     $('.discogs-research-button').on('click',function(e){
+
         direction = e.target.className.split('-')[0];
-        if(direction=='next'){
-            if(i==discogsArrayLenght){
+        if (direction=='next') {
+            if (i == discogsArrayLenght) {
                 i=0;
-            }
-            else{
+            } else {
                 i++;
             }
-        }
-        else{
-            if(i==0){
-                i=discogsArrayLenght;
-            }
-            else{
+        } else{
+            if (i == 0) {
+                i = discogsArrayLenght;
+            } else {
                 i--;
             }
         }
-        if(!gotWholeResult){
-            gotWholeResult = true;
-            $.ajax({
-                data: {count:i},
-                url: "/ajaxImage"
-            }).done(function(response) {
-                queryResult = response;
-                $('.research-logo').attr('src',queryResult['results'][i]['cover_image']);
-                $('.research-logo').attr('data-item-type',queryResult['results'][i]['type']);
-                $('.research-logo').attr('data-item-id',queryResult['results'][i]['id']);
-                $('.dj-or-label').html("Juste pour info c'est un "+queryResult['results'][i]['type']);
-            });
-        }
-        else {
-            $('.research-logo').attr('src',queryResult['results'][i]['cover_image']);
-            $('.research-logo').attr('data-item-type',queryResult['results'][i]['type']);
-            $('.research-logo').attr('data-item-id',queryResult['results'][i]['id']);
-            $('.dj-or-label').html("Juste pour info c'est un "+queryResult['results'][i]['type']);
-        }
+
+        $('.research-logo').attr('src',discogsResponse[i].cover_image);
+        $('.research-logo').attr('data-item-type',discogsResponse[i].type);
+        $('.research-logo').attr('data-item-id',discogsResponse[i].id);
+        $('.dj-or-label').html("Juste pour info c'est un "+discogsResponse[i].type);
     });
 
     $('.good-answer-ma-man').on('click',function(e){

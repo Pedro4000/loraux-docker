@@ -44,10 +44,13 @@
             </section>
 
         </div>
+        <div id="discogs-data-div" class="d-none" data-response_discogs="{{ responseContents|json_encode() }}" >
+        </div>
     {% elseif (responseContents is not empty and responseContents['results'] is empty) %}
         <div class="alert alert-warning" role="alert">
         Pas de résultats
         </div>
     {% endif %}
+    
 
 {% endblock %}
