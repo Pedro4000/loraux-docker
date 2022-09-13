@@ -6,27 +6,25 @@ $(document).ready(function(){
     let k= howManyTabs;
     let queryResult;
     let direction;
-    let gotWholeResult = false;
     let videosLinks = [];
 
-    var discogsResponse = $('#discogs-data-div').data('response_discogs').results;
+    //var discogsResponse = $('#discogs-data-div').data('response_discogs').results;
     $('.discogs-research-button').on('click',function(e){
 
         direction = e.target.className.split('-')[0];
         if (direction=='next') {
             if (i == discogsArrayLenght) {
-                i=0;
+                i = 0;
             } else {
                 i++;
             }
-        } else{
+        } else {
             if (i == 0) {
                 i = discogsArrayLenght;
             } else {
                 i--;
             }
         }
-
         $('.research-logo').attr('src',discogsResponse[i].cover_image);
         $('.research-logo').attr('data-item-type',discogsResponse[i].type);
         $('.research-logo').attr('data-item-id',discogsResponse[i].id);
@@ -34,25 +32,22 @@ $(document).ready(function(){
     });
 
     $('.good-answer-ma-man').on('click',function(e){
-        throw new Error("my error message");
 
-        let id;
-        let type;
-        let i;
-        type = $('.research-logo').attr('data-item-type');
-        id = $('.research-logo').attr('data-item-id');
+        let type = $('.research-logo').attr('data-item-type');
+        let id = $('.research-logo').attr('data-item-id');
+
         $.ajax({
-            data: {id:id,type:type},
+            data: {
+                id:id,
+                type:type
+            },
             url: "/ajaxLoadVideos"
         }).done(function(response) {
             queryResult = response;
-            for (i=0; i <= queryResult[1].length; i++) {
-
-            }
 /*
             $('.video-section').append('<p><a href="http://127.0.0.1:8000/createYoutubePlaylist">Créer la playlist</a> </p>')
 */
-            for(i=0; i<5; i++){
+            for (i = 0; i < 5; i++) {
                 videosLinks.push(queryResult[1][i]);
             }
             $('.video-section').append('<p><button type="button" class="open-links-in-new-tab btn btn-light" data-uri='+videosLinks+'>Ouvrir cinq onglets</button> </p>')
@@ -70,20 +65,20 @@ $(document).ready(function(){
         k+=5;
         videosArray = videosArray.split(',');
         console.log(videosArray.length);
-       for(i=0; i<videosArray.length; i++){
+       for (i=0; i < videosArray.length; i++) {
            win = window.open(videosArray[i]);
            win.blur()
            window.focus();
        }
         m=1;
         videosLinks=[];
-        for(l=j; l<k ; l++){
-            if(m==1){
+        for (l = j; l < k ; l++) {
+            if (m==1) {
                 videosLinks= queryResult[1][l]+',';
                 m=2;
                 continue;
             }
-            if(l==k-1){
+            if (l == k-1) {
                 videosLinks = videosLinks+queryResult[1][l];
             }else{
                 videosLinks = videosLinks+queryResult[1][l]+',';

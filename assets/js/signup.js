@@ -2,11 +2,9 @@ $(document).ready(function(){
 
     $("#user_save").click(function(e){
         e.preventDefault();
-        console.log(validateEmail($("#user_emailAddress").val()));
-        if($("#user_emailAddress").val().toLowerCase() == $("#mail_confirm").val().toLowerCase()) {
+        if ($("#user_emailAddress").val().toLowerCase() == $("#mail_confirm").val().toLowerCase()) {
 
         } else {
-            console.log($("#same-email-alert"));
             $('#same-email-alert').css("display",'block');
         }
     });

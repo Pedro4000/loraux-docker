@@ -125,7 +125,7 @@ class YoutubeController extends AbstractController
             $youtubePlaylists = $service->playlists->listPlaylists('snippet,contentDetails', $queryParams);*/
 
             //test pour la fonction search de l'api
-/*            foreach($videosArrayFromDiscogs as $discogsVideo) {
+/*            foreach ($videosArrayFromDiscogs as $discogsVideo) {
                 $testUri = "https://www.youtube.com/watch?v=_B1qr5H_dDE";
                 $queryParamsForSearch = [
                     'q'=> "https://www.youtube.com/watch?v=-dikWB6wm0A"
@@ -133,7 +133,7 @@ class YoutubeController extends AbstractController
 
                 $specificVideoSearch = $service->search->listSearch('snippet', $queryParamsForSearch);
 
-                if($specificVideoSearch['item']) {
+                if ($specificVideoSearch['item']) {
                     $specificVideoId = $specificVideoSearch[0]['id']['videoId'];
                 }
             }*/
@@ -169,7 +169,7 @@ class YoutubeController extends AbstractController
             // Partie ou on va ajouter les playlists items donc les vidéos, à la playlist
             // Define the $playlistItem object, which will be uploaded as the request body.
 
-            foreach($videosArrayFromDiscogs['releases'] as $videoFromDiscogs){
+            foreach ($videosArrayFromDiscogs['releases'] as $videoFromDiscogs) {
 
                 $videoId = explode('&',explode('v=',  $videoFromDiscogs['videoUri'])[1])[0];
                 $playlistItem = new Google_Service_YouTube_PlaylistItem();
