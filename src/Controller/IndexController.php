@@ -16,6 +16,8 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Google\Service\ToolResults\PendingGoogleUpdateInsight;
+use App\Entity\PendingYoutubeTask;
 
 class IndexController extends AbstractController
 {
@@ -28,7 +30,7 @@ class IndexController extends AbstractController
     {
         $this->client = $client;
         $this->params = $params;
-        $this->discogsService = $discogsService;
+        $discogsService = $discogsService;
         $this->requestStack = $requestStack;
         $this->session = $this->requestStack->getSession();
 
@@ -38,16 +40,17 @@ class IndexController extends AbstractController
     #[Route('/', name: 'index')]
     public function indexAction(Request $request, RequestStack $requestStack, ManagerRegistry $doctrine): Response
     {
+
+        $metadata = $doctrine->getManager()->getClassMetadata(Label::class)->getAssociationNames();
+        dd($metadata);
         $client = new Client();
         $session = $requestStack->getSession();
-        $consumerKey = $this->getParameter('discogs_consumer_key');
-        $consumerSecret = $this->getParameter('discogs_consumer_secret');
+        $discogsCredentials = 'key='.$this->getParameter('discogs_consumer_key').'&secret='.$this->getParameter('discogs_consumer_secret');
         $baseDiscogsApi = 'https://api.discogs.com/';
         $responseContents = [];
         $videosArray = [];
         $discogsQueryInfos = [];
         $guzzleException='';
-        $discogsCredentials = 'key='.$consumerKey.'&secret='.$consumerSecret;
 
         /* auth of type "https://api.discogs.com/database/search?q=Nirvana&key=foo123&secret=bar456" */
 
@@ -79,46 +82,53 @@ class IndexController extends AbstractController
     }
 
     #[Route('/ajaxLoadVideos', name: 'ajaxLoadVideos')]
-    public function ajaxLoadVideosAction(Request $request, ManagerRegistry $doctrine)
-
+    public function ajaxLoadVideosAction(Request $request, ManagerRegistry $doctrine, DiscogsService $discogsService)
     {
-        $id = $request->query->get('id');
+        $idDiscogs = $request->query->get('idDiscogs');
         $em = $doctrine->getManager();
-        $type = $request->query->get('type');
-        $consumerKey = $this->getParameter('app.discogs_consumer_key');
-        $consumerSecret = $this->getParameter('app.discogs_consumer_secret');
+        $typeDiscogsQuery = $request->query->get('typeDiscogs');
+        $discogsCredentials = 'key='.$this->getParameter('discogs_consumer_key').'&secret='.$this->getParameter('discogs_consumer_secret');
         $baseDiscogsApi = 'https://api.discogs.com/';
         $recArray = [];
         $videosArray = [];
         $guzzleException= '';
-        $discogsCredentials = 'key='.$consumerKey.'&secret='.$consumerSecret;
         $videosArray['releases'] = [];
         $this->session->set('videosToPutInPlaylist','');
 
+
         // SI ON A DU CONTENU ALORS ON VA LISTER LES RELEASE PAR TYPE DOBJET
-        if ($type == 'label') {
-            $client = new Client();
-/*            $resSpec = $client->request('GET', $baseDiscogsApi.'labels/'.$id.'/releases?'.$discogsCredentials);*/
-            $resSpec = $client->request('GET', $baseDiscogsApi.'labels/'.$id.'/releases?'.$discogsCredentials.'&page=5&per_page=50');
-            $labelInfos = $client->request('GET', $baseDiscogsApi.'labels/'.$id.'?'.$discogsCredentials);
-            $labelInfos = json_decode($labelInfos->getBody()->getContents(),true);
-            $recArray = json_decode($resSpec->getBody()->getContents(),true);
+        $client = new Client();
+        if ($typeDiscogsQuery == 'label') {
+            $labelReleasesResponse = $client->request('GET', $baseDiscogsApi.'labels/'.$idDiscogs.'/releases?'.$discogsCredentials.'&per_page=50');
+            $labelInfosResponse = $client->request('GET', $baseDiscogsApi.'labels/'.$idDiscogs.'?'.$discogsCredentials);
 
-            if (!$this->getDoctrine()
-                ->getRepository(Label::class)
-                ->findOneBy([ 'discogsId' => $labelInfos['id']])) {
-                $this->discogsService->createNewLabel($labelInfos['id'], $labelInfos['name']);
+            if (!$labelInfosResponse->getStatusCode() == 200 || !$labelReleasesResponse->getStatusCode() == 200) {
+                return new JsonResponse([
+                    'status_code' => $labelReleasesResponse->getStatusCode(),
+                    'status' => 'error',
+                ]);
             };
-            $labelFromDb = $this->getDoctrine()->getRepository(Label::class)->findOneBy([ 'discogsId' => $labelInfos['id']]);
 
-        } elseif ($type == 'artist') {
-            $client = new Client();
-            $resSpec = $client->request('GET', $baseDiscogsApi.'artists/'.$id.'/releases?'.$discogsCredentials);
-            $artistInfos = $client->request('GET', $baseDiscogsApi.'artists/'.$id.'?'.$discogsCredentials);
+            $labelReleasesContent = json_decode($labelReleasesResponse->getBody()->getContents(), true);
+            $labelInfosContent = json_decode($labelInfosResponse->getBody()->getContents(), true);
+            $labelRepository = $doctrine->getRepository(Label::class);
+
+            dd($doctrine->getRepository(Artist::class)->findBy([
+                'discogsId' => 4
+            ]));
+
+            if (!$doctrine->getRepository(Label::class)->findOneBy([ 'discogsId' => $labelInfosContent['id']])) {
+                $discogsService->createNewLabel($labelInfosContent['id'], $labelInfosContent['name']);
+            };
+            $labelFromDb = $doctrine->getRepository(Label::class)->findOneBy([ 'discogsId' => $labelInfosContent['id']]);
+
+        } elseif ($typeDiscogsQuery == 'artist') {
+            $responseDiscogs = $client->request('GET', $baseDiscogsApi.'artists/'.$idDiscogs.'/releases?'.$discogsCredentials);
+            $artistInfos = $client->request('GET', $baseDiscogsApi.'artists/'.$idDiscogs.'?'.$discogsCredentials);
             $artistInfos = json_decode($artistInfos->getBody()->getContents(),true);
-            $recArray = json_decode($resSpec->getBody()->getContents(),true);
+            $recArray = json_decode($responseDiscogs->getBody()->getContents(),true);
 
-            if (!$this->getDoctrine()
+            if (!$doctrine
                 ->getRepository(Artist::class)
                 ->findOneBy([ 'discogsId' => $artistInfos['id']])) {
                 $newArtist = new Artist();
@@ -129,7 +139,6 @@ class IndexController extends AbstractController
             };
 
         }
-
 
 
         $now = new \DateTime();
@@ -159,9 +168,9 @@ class IndexController extends AbstractController
                 foreach ($recArray['releases'] as $release) {
                     $i++;
                     // si la release ne contient pas de track ou n'est pas présente en db on vient la créer
-                    if (!$this->getDoctrine()
+                    if (!$doctrine
                             ->getRepository(Release::class)
-                            ->findOneBy([ 'discogsId' => $release['id']]) || $this->getDoctrine()->getRepository(Release::class)->findOneBy([ 'discogsId' => $release['id']])->getTracks()->isEmpty()) {
+                            ->findOneBy([ 'discogsId' => $release['id']]) || $doctrine->getRepository(Release::class)->findOneBy([ 'discogsId' => $release['id']])->getTracks()->isEmpty()) {
                         try{
                             $client = new Client();
                             $resSpec = $client->request('GET', $baseDiscogsApi.'releases/'.$release['id'],
@@ -186,18 +195,18 @@ class IndexController extends AbstractController
                                 }
                                 $releaseArtists = [] ;
                                 foreach ($artistIdNameArray as $artist) {
-                                    if (!$this->getDoctrine()
+                                    if (!$doctrine
                                         ->getRepository(Artist::class)
                                         ->findOneBy([ 'discogsId' => $artist['id']])) {
-                                        $this->discogsService->createNewArtist($artist['id'], $artist['name']);
+                                        $discogsService->createNewArtist($artist['id'], $artist['name']);
                                     }
-                                    $releaseArtist = $this->getDoctrine()->getRepository(Artist::class)->findOneBy([ 'discogsId' => $artist['id']]);
+                                    $releaseArtist = $doctrine->getRepository(Artist::class)->findOneBy([ 'discogsId' => $artist['id']]);
                                     array_push($releaseArtists, $releaseArtist);
                                 }
-                                if (!$this->getDoctrine()->getRepository(Release::class)->findOneBy([ 'discogsId' => $releaseInfos['id']]) || $this->getDoctrine()->getRepository(Release::class)->findOneBy([ 'discogsId' => $releaseInfos['id']])->getTracks()->isEmpty()) {
-                                    $releaseInfos = $this->discogsService->setArrayKeyToNullIfNonExistent($releaseInfos);
-                                    $this->discogsService->createNewRelease($releaseInfos['id'], $releaseInfos['title'], $releaseInfos['released'], $releaseInfos['videos'], $labelFromDb, $releaseArtists);
-                                    $release = $this->getDoctrine()->getRepository(Release::class)->findOneBy(['discogsId' => $releaseInfos['id']]);
+                                if (!$doctrine->getRepository(Release::class)->findOneBy([ 'discogsId' => $releaseInfos['id']]) || $doctrine->getRepository(Release::class)->findOneBy([ 'discogsId' => $releaseInfos['id']])->getTracks()->isEmpty()) {
+                                    $releaseInfos = $discogsService->setArrayKeyToNullIfNonExistent($releaseInfos);
+                                    $discogsService->createNewRelease($releaseInfos['id'], $releaseInfos['title'], $releaseInfos['released'], $releaseInfos['videos'], $labelFromDb, $releaseArtists);
+                                    $release = $doctrine->getRepository(Release::class)->findOneBy(['discogsId' => $releaseInfos['id']]);
 
                                     $trackArtists = [];
                                     foreach ($releaseInfos['tracklist'] as $track) {
@@ -211,7 +220,7 @@ class IndexController extends AbstractController
                                                 }
                                             }
                                         }
-                                        $this->discogsService->createNewTrack($track, $trackArtists, $release, $labelFromDb);
+                                        $discogsService->createNewTrack($track, $trackArtists, $release, $labelFromDb);
                                     }
                                 }
                             }
@@ -220,22 +229,22 @@ class IndexController extends AbstractController
                                 $artistInfos = $client->request('GET', $baseDiscogsApi . 'artists/' . $releaseInfos['artists']['0']['id'] . '?' . $discogsCredentials);
                                 $artistInfos = json_decode($artistInfos->getBody()->getContents(), true);
                                 //on créer l'artiste si inexistant
-                                if (!$this->getDoctrine()
+                                if (!$doctrine
                                     ->getRepository(Artist::class)
                                     ->findOneBy([ 'discogsId' => $releaseInfos['artists'][0]['id']])) {
-                                    $this->discogsService->createNewArtist($releaseInfos['artists'][0]['id'], $artistInfos['name']);
+                                    $discogsService->createNewArtist($releaseInfos['artists'][0]['id'], $artistInfos['name']);
                                 }
-                                $releaseArtist = $this->getDoctrine()->getRepository(Artist::class)
+                                $releaseArtist = $doctrine->getRepository(Artist::class)
                                     ->findOneBy(['discogsId' => $releaseInfos['artists'][0]['id']]);
                                 //puis la release
-                                if (!$this->getDoctrine()->getRepository(Release::class)->findOneBy([ 'discogsId' => $releaseInfos['id']])
-                                    || $this->getDoctrine()->getRepository(Release::class)->findOneBy([ 'discogsId' => $releaseInfos['id']])->getTracks()->isEmpty()
+                                if (!$doctrine->getRepository(Release::class)->findOneBy([ 'discogsId' => $releaseInfos['id']])
+                                    || $doctrine->getRepository(Release::class)->findOneBy([ 'discogsId' => $releaseInfos['id']])->getTracks()->isEmpty()
                                 ){
-                                    $releaseInfos = $this->discogsService->setArrayKeyToNullIfNonExistent($releaseInfos);
-                                    $this->discogsService->createNewRelease($releaseInfos['id'], $releaseInfos['title'], $releaseInfos['released'], $releaseInfos['videos'], $labelFromDb, $releaseArtist);
-                                    $release = $this->getDoctrine()->getRepository(Release::class)->findOneBy(['discogsId' => $releaseInfos['id']]);
+                                    $releaseInfos = $discogsService->setArrayKeyToNullIfNonExistent($releaseInfos);
+                                    $discogsService->createNewRelease($releaseInfos['id'], $releaseInfos['title'], $releaseInfos['released'], $releaseInfos['videos'], $labelFromDb, $releaseArtist);
+                                    $release = $doctrine->getRepository(Release::class)->findOneBy(['discogsId' => $releaseInfos['id']]);
                                     foreach ($releaseInfos['tracklist'] as $track) {
-                                        $this->discogsService->createNewTrack($track, $releaseArtist, $release, $labelFromDb);
+                                        $discogsService->createNewTrack($track, $releaseArtist, $release, $labelFromDb);
 
                                     }
                                 }
@@ -263,7 +272,7 @@ class IndexController extends AbstractController
 
         }
 
-        if ($recArray['pagination']['items']==count($labelFromDb->getReleases())) {
+        if ($recArray['pagination']['items'] == count($labelFromDb->getReleases())) {
             $now = new \Datetime();
             $labelFromDb->setLastTimeFullyScraped($now);
             $em->persist($labelFromDb);

@@ -8,7 +8,7 @@ $(document).ready(function(){
     let direction;
     let videosLinks = [];
 
-    //var discogsResponse = $('#discogs-data-div').data('response_discogs').results;
+    var discogsResponse = $('#discogs-data-div').data('response_discogs').results;
     $('.discogs-research-button').on('click',function(e){
 
         direction = e.target.className.split('-')[0];
@@ -38,15 +38,15 @@ $(document).ready(function(){
 
         $.ajax({
             data: {
-                id:id,
-                type:type
+                idDiscogs : id,
+                typeDiscogs : type
             },
             url: "/ajaxLoadVideos"
         }).done(function(response) {
+
             queryResult = response;
-/*
+
             $('.video-section').append('<p><a href="http://127.0.0.1:8000/createYoutubePlaylist">Créer la playlist</a> </p>')
-*/
             for (i = 0; i < 5; i++) {
                 videosLinks.push(queryResult[1][i]);
             }

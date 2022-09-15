@@ -6,10 +6,8 @@ use App\Repository\ReleaseRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass=ReleaseRepository::class)
- * @ORM\Table(name="`release`")
- */
+#[ORM\Entity(repositoryClass: ReleaseRepository::class)]
+#[ORM\Table(name: 'release')]
 class Release
 {
 
@@ -21,22 +19,15 @@ class Release
         $this->tracks = new ArrayCollection();
     }
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
     private $id;
 
-    /**
-     * @ORM\Column(type="integer")
-     */
-    private $discogsId;
-
-    /**
-     * @ORM\Column(type="array", nullable=true)
-     */
-    private $videos = [];
+    #[ORM\Column]
+    #[Assert\Type('int')]
+    private ?int $discogsid;
 
     /**
      * @ORM\ManyToMany(targetEntity="App\Entity\Label", inversedBy="releases")

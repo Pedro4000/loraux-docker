@@ -25,7 +25,8 @@ Problèmes possibles : problème d'authorisation (dans in ~/.docker/config.json 
 0. 
     1. Ajouter phpmyadmin (OK)
     2. Changer les annotations par des attributs
-    2. Reprendre API discogs et index musique
+    3. Reprendre API discogs et index musique
+        1. Ajouter pour Youtube Data API un systeme que queue pour les taches stoppées.
 1. Reprendre processus d'authentification
 2. gérer les differents codes d'erreurs pour toutes les request curl/guzzle (si pb connexion ac api)
     1. Pour google et youtube data api gérer les maximums de request

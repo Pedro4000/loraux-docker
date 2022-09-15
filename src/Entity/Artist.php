@@ -4,12 +4,11 @@ namespace App\Entity;
 
 use App\Repository\ArtistRepository;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass=ArtistRepository::class)
- * @ORM\Table(name="`artist`")
- */
+#[ORM\Entity(repositoryClass: ArtistRepository::class)]
+#[ORM\Table(name: 'artist')]
 class Artist
 {
 
@@ -17,34 +16,27 @@ class Artist
     {
         $this->releases = new ArrayCollection();
         $this->tracks = new ArrayCollection();
+        $this->saluts = new ArrayCollection();
     }
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
     private $id;
 
-    /**
-     * @ORM\Column(type="integer")
-     */
-    private $discogsId;
+    #[ORM\Column]
+    #[Assert\Type('int')]
+    private ?int $discogsId;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(length: 255)]
+    #[Assert\Type('string')]
     private $name;
 
-    /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Release", mappedBy="artists")
-     */
-    private $releases;
+    #[ORM\ManyToMany(targetEntity:Release::class, mappedBy:"artists")]
+    private Collection $releases;
 
-    /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Track", mappedBy="artists")
-     */
-    private $tracks;
+    #[ORM\ManyToMany(targetEntity:Track::class, mappedBy:"artists")]
+    private Collection $tracks;
 
     /**
      * @return mixed
@@ -132,6 +124,5 @@ class Artist
         }
         return $this;
     }
-
 
 }

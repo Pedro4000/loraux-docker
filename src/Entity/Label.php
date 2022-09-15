@@ -6,14 +6,10 @@ use App\Repository\LabelRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass=LabelRepository::class)
- * @ORM\Table(name="`label`")
- */
+#[ORM\Entity(repositoryClass: LabelRepository::class)]
+#[ORM\Table(name: 'label')]
 class Label
 {
-
-
     public function __construct()
     {
         $this->labels = new ArrayCollection();
@@ -21,33 +17,27 @@ class Label
         $this->releases = new ArrayCollection();
     }
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
     private $id;
 
-    /**
-     * @ORM\Column(type="integer")
-     */
-    private $discogsId;
+    #[ORM\Column]
+    private ?int $discogsid;
 
-    /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Release", mappedBy="labels")
-     */
+    #[ORM\ManyToMany(targetEntity: Release::class, mappedBy:"labels")]
     private $releases;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $name;
+    #[Column(length:255)]
+    #[asset(length:255)]
+    private string $name;
 
+    #[ORM\OneToOne(targetEntity: PendingYoutubeTask::class, inversedBy: 'label')]
+    private $pendingYoutubeTask;
 
-    /**
-     * @ORM\Column(type="datetime", nullable=true)
-     */
-    private $lastTimeFullyScraped;
+    #[Column(nullable:true)]
+    private string $lastTimeFullyScraped;
 
     /**
      * @return mixed

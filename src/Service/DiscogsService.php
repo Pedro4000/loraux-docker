@@ -12,12 +12,16 @@ class DiscogsService
 {
     private $em;
 
-    public function __construct(){
+    public function __construct(ManagerRegistry $doctrine){
+        $this->em = $doctrine->getManager();
     }
-    public function createNewArtist($discogsId, $name) {
+
+    public function createNewArtist(int $discogsId, string $name) {
+
         $newArtist = new Artist();
         $newArtist->setName($name);
         $newArtist->setDiscogsId($discogsId);
+        dd($newArtist);
         $this->em->persist($newArtist);
         $this->em->flush();
     }
@@ -37,7 +41,7 @@ class DiscogsService
         $this->em->flush();
     }
 
-    public function createNewLabel($discogsId, $name){
+    public function createNewLabel(int $discogsId, string $name){
         $newLabel = new Label();
         $newLabel->setName($name);
         $newLabel->setDiscogsId($discogsId);
