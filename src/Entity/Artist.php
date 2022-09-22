@@ -37,12 +37,19 @@ class Artist extends DiscogsClass
         return $this->releases;
     }
 
-    /**
-     * @param mixed $releases
-     */
-    public function setReleases($releases): void
+    public function addRelease(Release $release): self
     {
-        $this->releases = $releases;
+        if (!$this->releases->contains($release)) {
+            $this->releases[] = $release;
+        }
+        return $this;
+    }
+    public function removeRelease(Release $release): self
+    {
+        if ($this->releases->contains($release)) {
+            $this->releases->removeElement($release);
+        }
+        return $this;
     }
 
     /**

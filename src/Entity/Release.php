@@ -10,10 +10,8 @@ use Doctrine\DBAL\Types\Types;
 
 #[ORM\Entity(repositoryClass: ReleaseRepository::class)]
 #[ORM\Table(name: 'release')]
-class Release
+class Release extends DiscogsClass
 {
-
-
     public function __construct()
     {
         $this->labels = new ArrayCollection();
@@ -21,16 +19,6 @@ class Release
         $this->tracks = new ArrayCollection();
         $this->label = new ArrayCollection();
     }
-
-
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private $id;
-
-    #[ORM\Column]
-    #[Assert\Type('int')]
-    private ?int $discogsid;
 
     #[ORM\ManyToMany(targetEntity: Label::class, mappedBy:"releases")]
     private $labels;
