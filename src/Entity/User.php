@@ -16,40 +16,29 @@ class User
     #[ORM\Column]
     private $id;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $firstName;
+    #[ORM\Column(length: 255)];
+    private string $firstName;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $familyName;
+    #[ORM\Column(length: 255)]
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $emailAddress;
+    private string $familyName;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $password;
+    #[ORM\Column(length: 255)]
 
-    /**
-     * @ORM\Column(type="datetime")
-     */
-    private $birthDate;
+    private string $emailAddress;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $sex;
+    #[ORM\Column(length: 255)]
 
-    /**
-     * @ORM\Column(type="boolean")
-     */
-    private $isMailAddressVerified;
+    private string $password;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private \DateTime $birthDate;
+
+    #[ORM\Column(length: 255)]
+    private string $sex;
+
+    #[ORM\Column]
+    private bool $isMailAddressVerified = false;
 
     public function getId(): ?int
     {

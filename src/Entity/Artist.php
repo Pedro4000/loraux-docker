@@ -9,28 +9,15 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ArtistRepository::class)]
 #[ORM\Table(name: 'artist')]
-class Artist
+class Artist extends DiscogsClass
 {
 
     public function __construct()
     {
         $this->releases = new ArrayCollection();
         $this->tracks = new ArrayCollection();
-        $this->saluts = new ArrayCollection();
+        $this->discogsVideos = new ArrayCollection();
     }
-
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private $id;
-
-    #[ORM\Column]
-    #[Assert\Type('int')]
-    private ?int $discogsId;
-
-    #[ORM\Column(length: 255)]
-    #[Assert\Type('string')]
-    private $name;
 
     #[ORM\ManyToMany(targetEntity:Release::class, mappedBy:"artists")]
     private Collection $releases;
@@ -38,53 +25,9 @@ class Artist
     #[ORM\ManyToMany(targetEntity:Track::class, mappedBy:"artists")]
     private Collection $tracks;
 
-    /**
-     * @return mixed
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
+    #[ORM\ManyToMany(targetEntity: DiscogsVideo::class, mappedBy: 'artist')]
+    private Collection $discogsVideos;
 
-    /**
-     * @param mixed $id
-     */
-    public function setId($id): void
-    {
-        $this->id = $id;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getDiscogsId()
-    {
-        return $this->discogsId;
-    }
-
-    /**
-     * @param mixed $discogsId
-     */
-    public function setDiscogsId($discogsId): void
-    {
-        $this->discogsId = $discogsId;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * @param mixed $name
-     */
-    public function setName($name): void
-    {
-        $this->name = $name;
-    }
 
     /**
      * @return mixed
@@ -122,6 +65,33 @@ class Artist
         if ($this->tracks->contains($track)) {
             $this->tracks->removeElement($track);
         }
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, DiscogsVideo>
+     */
+    public function getDiscogsVideos(): Collection
+    {
+        return $this->discogsVideos;
+    }
+
+    public function addDiscogsVideo(DiscogsVideo $discogsVideo): self
+    {
+        if (!$this->discogsVideos->contains($discogsVideo)) {
+            $this->discogsVideos->add($discogsVideo);
+            $discogsVideo->addArtist($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDiscogsVideo(DiscogsVideo $discogsVideo): self
+    {
+        if ($this->discogsVideos->removeElement($discogsVideo)) {
+            $discogsVideo->removeArtist($this);
+        }
+
         return $this;
     }
 

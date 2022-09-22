@@ -4,7 +4,9 @@ namespace App\Entity;
 
 use App\Repository\ReleaseRepository;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\DBAL\Types\Types;
 
 #[ORM\Entity(repositoryClass: ReleaseRepository::class)]
 #[ORM\Table(name: 'release')]
@@ -17,6 +19,7 @@ class Release
         $this->labels = new ArrayCollection();
         $this->artists = new ArrayCollection();
         $this->tracks = new ArrayCollection();
+        $this->label = new ArrayCollection();
     }
 
 
@@ -29,60 +32,21 @@ class Release
     #[Assert\Type('int')]
     private ?int $discogsid;
 
-    /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Label", inversedBy="releases")
-     */
+    #[ORM\ManyToMany(targetEntity: Label::class, mappedBy:"releases")]
     private $labels;
 
-    /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Artist", inversedBy="releases")
-     */
+    #[ORM\ManyToMany(targetEntity: Artist::class, mappedBy:"releases")]
     private $artists;
 
-    /**
-     * @ORM\Column(type="datetime", nullable=true)
-     */
-    private $releaseDate;
-
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Track", mappedBy="release")
-     */
+    #[ORM\ManyToMany(targetEntity: Track::class, mappedBy:"releases")]
     private $tracks;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $name;
+    private Collection $discogsVideos;
+    #[ORM\OneToMany(mappedBy: 'release', targetEntity: DiscogsVideo::class)]
+    
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $releaseDate = null;
 
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
-    public function getDiscogsId(): ?int
-    {
-        return $this->discogsId;
-    }
-
-    public function setDiscogsId(int $discogsId): self
-    {
-        $this->discogsId = $discogsId;
-
-        return $this;
-    }
-
-    public function getVideos(): ?array
-    {
-        return $this->videos;
-    }
-
-    public function setVideos(?array $videos): self
-    {
-        $this->videos = $videos;
-
-        return $this;
-    }
 
     /**
      * @return mixed
@@ -105,6 +69,31 @@ class Release
         if ($this->labels->contains($label)) {
             $this->labels->removeElement($label);
             $label->removeRelease($this);
+        }
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDiscogsVideos()
+    {
+        return $this->discogsVideos;
+    }
+
+    public function addDiscogsVideo(DiscogsVideo $discogsVideo): self
+    {
+        if (!$this->discogsVideos->contains($discogsVideo)) {
+            $this->discogsVideos[] = $discogsVideo;
+            $discogsVideo->addRelease($this);
+        }
+        return $this;
+    }
+    public function removeDiscogsVideo(DiscogsVideo $discogsVideo): self
+    {
+        if ($this->discogsVideos->contains($discogsVideo)) {
+            $this->discogsVideos->removeElement($discogsVideo);
+            $discogsVideo->removeRelease($this);
         }
         return $this;
     }
@@ -174,25 +163,6 @@ class Release
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * @param mixed $name
-     */
-    public function setName($name): void
-    {
-        $this->name = $name;
-    }
-
-
-
-
-
+    // TODO AJOUTER GETTER SETTERS POUR LA DERNIERE RELATION
 
 }

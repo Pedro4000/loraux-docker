@@ -7,10 +7,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass=TrackRepository::class)
- * @ORM\Table(name="`track`")
- */
+#[ORM\Entity(repositoryClass: TrackRepository::class)]
+#[ORM\Table(name: 'track')]
 class Track
 {
 
@@ -24,19 +22,13 @@ class Track
     #[ORM\Column]
     private $id;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $name;
+    #[ORM\Column(length: 255)]
+    private ?string $name = null;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Release", inversedBy="tracks")
-     */
+    #[ORM\ManyToOne(targetEntity:Release::class, inversedBy:"tracks")]
     private $release;
 
-    /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Artist", inversedBy="tracks")
-     */
+     #[ORM\ManyToMany(targetEntity:Artist::class, inversedBy:"tracks")]
     private $artists;
 
     /**
@@ -118,8 +110,5 @@ class Track
     {
         $this->name = $name;
     }
-
-
-
 
 }

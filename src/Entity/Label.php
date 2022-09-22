@@ -4,72 +4,31 @@ namespace App\Entity;
 
 use App\Repository\LabelRepository;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: LabelRepository::class)]
 #[ORM\Table(name: 'label')]
-class Label
+class Label extends DiscogsClass
 {
     public function __construct()
     {
         $this->labels = new ArrayCollection();
         $this->artists = new ArrayCollection();
         $this->releases = new ArrayCollection();
+        $this->discogsVideos = new ArrayCollection();
     }
 
-
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private $id;
-
-    #[ORM\Column]
-    private ?int $discogsid;
 
     #[ORM\ManyToMany(targetEntity: Release::class, mappedBy:"labels")]
     private $releases;
 
-    #[Column(length:255)]
-    #[asset(length:255)]
-    private string $name;
-
     #[ORM\OneToOne(targetEntity: PendingYoutubeTask::class, inversedBy: 'label')]
     private $pendingYoutubeTask;
 
-    #[Column(nullable:true)]
-    private string $lastTimeFullyScraped;
 
-    /**
-     * @return mixed
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    /**
-     * @param mixed $id
-     */
-    public function setId($id): void
-    {
-        $this->id = $id;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getDiscogsId()
-    {
-        return $this->discogsId;
-    }
-
-    /**
-     * @param mixed $discogsId
-     */
-    public function setDiscogsId($discogsId): void
-    {
-        $this->discogsId = $discogsId;
-    }
+    #[ORM\OneToMany(mappedBy: 'label', targetEntity: DiscogsVideo::class)]
+    private Collection $discogsVideos;
 
     /**
      * @return mixed
@@ -95,35 +54,33 @@ class Label
     }
 
     /**
-     * @return mixed
+     * @return Collection<int, DiscogsVideo>
      */
-    public function getName()
+    public function getDiscogsVideos(): Collection
     {
-        return $this->name;
+        return $this->discogsVideos;
     }
 
-    /**
-     * @param mixed $name
-     */
-    public function setName($name): void
+    public function addDiscogsVideo(DiscogsVideo $discogsVideo): self
     {
-        $this->name = $name;
+        if (!$this->discogsVideos->contains($discogsVideo)) {
+            $this->discogsVideos->add($discogsVideo);
+            $discogsVideo->setLabel($this);
+        }
+
+        return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getLastTimeFullyScraped()
+    public function removeDiscogsVideo(DiscogsVideo $discogsVideo): self
     {
-        return $this->lastTimeFullyScraped;
-    }
+        if ($this->discogsVideos->removeElement($discogsVideo)) {
+            // set the owning side to null (unless already changed)
+            if ($discogsVideo->getLabel() === $this) {
+                $discogsVideo->setLabel(null);
+            }
+        }
 
-    /**
-     * @param mixed $lastTimeFullyScraped
-     */
-    public function setLastTimeFullyScraped($lastTimeFullyScraped): void
-    {
-        $this->lastTimeFullyScraped = $lastTimeFullyScraped;
+        return $this;
     }
 
 
