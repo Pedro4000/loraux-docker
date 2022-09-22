@@ -15,13 +15,14 @@ class PendingYoutubeTask
     #[ORM\Column]
     private ?int $id = null;
 
-
     #[ORM\OneToOne(targetEntity: Label::class, inversedBy: 'pendingYoutubeTask')]
     private $label;
 
-
     #[ORM\OneToOne(targetEntity: Release::class, inversedBy: 'pendingYoutubeTask')]
     private $release;
+
+    #[ORM\OneToOne(targetEntity: Artist::class, inversedBy: 'pendingYoutubeTask')]
+    private $artist;
 
     #[ORM\Column(nullable: true)]
     private ?int $priority = null;
@@ -34,6 +35,19 @@ class PendingYoutubeTask
     public function setLabel(?Label $label): self
     {
         $this->label = $label;
+
+        return $this;
+    }
+
+
+    public function getArtist(): ?Artist
+    {
+        return $this->artist;
+    }
+
+    public function setArtist(?Artist $artist): self
+    {
+        $this->artist = $artist;
 
         return $this;
     }

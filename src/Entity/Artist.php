@@ -11,23 +11,24 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: 'artist')]
 class Artist extends DiscogsClass
 {
-
-    public function __construct(
-        public ArrayCollection $releases,
-        public ArrayCollection $tracks,
-        public ArrayCollection $discogsVideos,
-    )
-    {}
-
+    
     #[ORM\ManyToMany(targetEntity:Release::class, mappedBy:"artists")]
     private Collection $releases;
-
+    
     #[ORM\ManyToMany(targetEntity:Track::class, mappedBy:"artists")]
     private Collection $tracks;
-
+    
     #[ORM\ManyToMany(targetEntity: DiscogsVideo::class, mappedBy: 'artist')]
     private Collection $discogsVideos;
+    
 
+    public function __construct()
+    {
+        $this->releases = new ArrayCollection();
+        $this->tracks = new ArrayCollection();
+        $this->discogsVideos = new ArrayCollection();
+    }
+    
 
     /**
      * @return mixed

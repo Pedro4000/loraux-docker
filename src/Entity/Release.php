@@ -17,7 +17,8 @@ class Release extends DiscogsClass
         $this->labels = new ArrayCollection();
         $this->artists = new ArrayCollection();
         $this->tracks = new ArrayCollection();
-        $this->label = new ArrayCollection();
+        $this->labels = new ArrayCollection();
+        $this->discogsVideos = new ArrayCollection();
     }
 
     #[ORM\ManyToMany(targetEntity: Label::class, mappedBy:"releases")]
@@ -29,8 +30,8 @@ class Release extends DiscogsClass
     #[ORM\ManyToMany(targetEntity: Track::class, mappedBy:"releases")]
     private $tracks;
 
-    private Collection $discogsVideos;
     #[ORM\OneToMany(mappedBy: 'release', targetEntity: DiscogsVideo::class)]
+    private Collection $discogsVideos;
     
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $releaseDate = null;
@@ -73,7 +74,7 @@ class Release extends DiscogsClass
     {
         if (!$this->discogsVideos->contains($discogsVideo)) {
             $this->discogsVideos[] = $discogsVideo;
-            $discogsVideo->addRelease($this);
+            $discogsVideo->setRelease($this);
         }
         return $this;
     }
@@ -81,7 +82,7 @@ class Release extends DiscogsClass
     {
         if ($this->discogsVideos->contains($discogsVideo)) {
             $this->discogsVideos->removeElement($discogsVideo);
-            $discogsVideo->removeRelease($this);
+            $discogsVideo->setRelease(new ArrayCollection());
         }
         return $this;
     }

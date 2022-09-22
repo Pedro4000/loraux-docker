@@ -25,6 +25,10 @@ class DiscogsClass
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
+
+    #[ORM\OneToOne(targetEntity: PendingYoutubeTask::class, inversedBy: 'artist')]
+    private $pendingYoutubeTask;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -77,4 +81,19 @@ class DiscogsClass
 
         return $this;
     }
+	/**
+	 * @return mixed
+	 */
+	function getPendingYoutubeTask() {
+		return $this->pendingYoutubeTask;
+	}
+	
+	/**
+	 * @param mixed $pendingYoutubeTask 
+	 * @return DiscogsClass
+	 */
+	function setPendingYoutubeTask($pendingYoutubeTask): self {
+		$this->pendingYoutubeTask = $pendingYoutubeTask;
+		return $this;
+	}
 }

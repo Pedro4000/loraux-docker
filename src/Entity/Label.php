@@ -13,8 +13,6 @@ class Label extends DiscogsClass
 {
     public function __construct()
     {
-        $this->labels = new ArrayCollection();
-        $this->artists = new ArrayCollection();
         $this->releases = new ArrayCollection();
         $this->discogsVideos = new ArrayCollection();
     }
@@ -22,9 +20,6 @@ class Label extends DiscogsClass
 
     #[ORM\ManyToMany(targetEntity: Release::class, mappedBy:"labels")]
     private $releases;
-
-    #[ORM\OneToOne(targetEntity: PendingYoutubeTask::class, inversedBy: 'label')]
-    private $pendingYoutubeTask;
 
 
     #[ORM\OneToMany(mappedBy: 'label', targetEntity: DiscogsVideo::class)]
@@ -82,7 +77,5 @@ class Label extends DiscogsClass
 
         return $this;
     }
-
-
 
 }
