@@ -1,5 +1,5 @@
 <?php
-
+/*
 namespace App\Entity;
 
 use App\Repository\TestRepository;
@@ -18,3 +18,4 @@ class Test
         return $this->id;
     }
 }
+*/

@@ -20,7 +20,7 @@ class DiscogsClass
     private ?string $name = null;
 
     #[ORM\Column]
-    private ?bool $isFullyScrapped = null;
+    private ?bool $fullyScrapped = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -54,14 +54,14 @@ class DiscogsClass
         return $this;
     }
 
-    public function isIsFullyScrapped(): ?bool
+    public function isFullyScrapped(): ?bool
     {
-        return $this->isFullyScrapped;
+        return $this->fullyScrapped;
     }
 
-    public function setIsFullyScrapped(bool $isFullyScrapped): self
+    public function setFullyScrapped(bool $fullyScrapped): self
     {
-        $this->isFullyScrapped = $isFullyScrapped;
+        $this->fullyScrapped = $fullyScrapped;
 
         return $this;
     }
