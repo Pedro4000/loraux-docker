@@ -12,12 +12,12 @@ use Doctrine\ORM\Mapping as ORM;
 class Artist extends DiscogsClass
 {
 
-    public function __construct()
-    {
-        $this->releases = new ArrayCollection();
-        $this->tracks = new ArrayCollection();
-        $this->discogsVideos = new ArrayCollection();
-    }
+    public function __construct(
+        public ArrayCollection $releases,
+        public ArrayCollection $tracks,
+        public ArrayCollection $discogsVideos,
+    )
+    {}
 
     #[ORM\ManyToMany(targetEntity:Release::class, mappedBy:"artists")]
     private Collection $releases;

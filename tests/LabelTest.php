@@ -2,12 +2,24 @@
 
 namespace App\Tests;
 
+use App\Entity\{DiscogsVideo, Artist, Release, Label};
+use Doctrine\Common\Collections\ArrayCollection;
 use PHPUnit\Framework\TestCase;
 
 class LabelTest extends TestCase
 {
-    public function testSomething(): void
+    public function testIsTrue(): void
     {
-        $this->assertTrue(true);
+
+    }
+
+    public function testIsFalse(): void
+    {
+
+    }
+    
+    public function testIsEmpty(): void
+    {
+
     }
 }

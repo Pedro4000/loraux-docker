@@ -3,11 +3,23 @@
 namespace App\Tests;
 
 use PHPUnit\Framework\TestCase;
+use App\Entity\{DiscogsVideo, Artist, Release, Label};
+use Doctrine\Common\Collections\ArrayCollection;
 
 class ReleaseTest extends TestCase
 {
-    public function testSomething(): void
+    public function testIsTrue(): void
     {
-        $this->assertTrue(true);
+
+    }
+
+    public function testIsFalse(): void
+    {
+
+    }
+    
+    public function testIsEmpty(): void
+    {
+
     }
 }
