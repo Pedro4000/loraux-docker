@@ -3,9 +3,11 @@
 namespace App\Entity;
 
 use App\Repository\LabelRepository;
+use App\Entity\DiscogsTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\DiscogsClass;
 
 #[ORM\Entity(repositoryClass: LabelRepository::class)]
 #[ORM\Table(name: 'label')]
@@ -16,14 +18,17 @@ class Label extends DiscogsClass
         $this->releases = new ArrayCollection();
         $this->discogsVideos = new ArrayCollection();
     }
-
+   
 
     #[ORM\ManyToMany(targetEntity: Release::class, mappedBy:"labels")]
-    private $releases;
+    private Collection $releases;
 
 
-    #[ORM\OneToMany(mappedBy: 'label', targetEntity: DiscogsVideo::class)]
+    #[ORM\OneToMany(targetEntity: DiscogsVideo::class, mappedBy: 'label')]
     private Collection $discogsVideos;
+
+    #[ORM\OneToOne(targetEntity: PendingYoutubeTask::class, inversedBy: 'label')]
+    private $pendingYoutubeTask;
 
     /**
      * @return mixed
@@ -77,5 +82,21 @@ class Label extends DiscogsClass
 
         return $this;
     }
+
+    /**
+	 * @return mixed
+	 */
+	function getPendingYoutubeTask() {
+		return $this->pendingYoutubeTask;
+	}
+	
+	/**
+	 * @param mixed $pendingYoutubeTask 
+	 * @return Label
+	 */
+	function setPendingYoutubeTask($pendingYoutubeTask): self {
+		$this->pendingYoutubeTask = $pendingYoutubeTask;
+		return $this;
+	}
 
 }

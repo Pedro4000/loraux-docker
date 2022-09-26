@@ -148,10 +148,10 @@ class ReleaseTest extends TestCase
         $discogsVideoA = new DiscogsVideo();
         $discogsVideoA->setUrl('a');
 
-        $release->addLabel($labelA)->removeLabel($labelB)
-                ->addArtist($artistA)->removeArtist($artistB)
-                ->addTrack($trackA)->removeTrack($trackB)
-                ->addDiscogsVideo($discogsVideoA)->removeDiscogsVideo($discogsVideoB);
+        $release->addLabel($labelA)->removeLabel($labelA)
+                ->addArtist($artistA)->removeArtist($artistA)
+                ->addTrack($trackA)->removeTrack($trackA)
+                ->addDiscogsVideo($discogsVideoA)->removeDiscogsVideo($discogsVideoA);
 
         $this->assertEmpty($release->getLabels());
         $this->assertEmpty($release->getArtists());

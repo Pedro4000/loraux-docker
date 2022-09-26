@@ -3,11 +3,14 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\DBAL\Types\Types;
 
-/**
- * @ORM\Entity(repositoryClass=UserRepository::class)
- */
+
+#[ORM\Entity(repositoryClass: UserRepository::class)]
+#[ORM\Table(name: 'user')]
 class User
 {
 
@@ -16,7 +19,7 @@ class User
     #[ORM\Column]
     private $id;
 
-    #[ORM\Column(length: 255)];
+    #[ORM\Column(length: 255)]
     private string $firstName;
 
     #[ORM\Column(length: 255)]
@@ -31,14 +34,22 @@ class User
 
     private string $password;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private \DateTime $birthDate;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private \DateTimeImmutable $birthDate;
 
     #[ORM\Column(length: 255)]
     private string $sex;
 
     #[ORM\Column]
     private bool $isMailAddressVerified = false;
+
+    #[ORM\ManyToMany(targetEntity: TestAllTypes::class, mappedBy: 'ManyToMany2')]
+    private Collection $testAllTypes;
+
+    public function __construct()
+    {
+        $this->testAllTypes = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -132,9 +143,38 @@ class User
     /**
      * @param mixed $password
      */
-    public function setPassword($password): void
+    public function setPassword($password): self
     {
         $this->password = $password;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, TestAllTypes>
+     */
+    public function getTestAllTypes(): Collection
+    {
+        return $this->testAllTypes;
+    }
+
+    public function addTestAllType(TestAllTypes $testAllType): self
+    {
+        if (!$this->testAllTypes->contains($testAllType)) {
+            $this->testAllTypes->add($testAllType);
+            $testAllType->addManyToMany2($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTestAllType(TestAllTypes $testAllType): self
+    {
+        if ($this->testAllTypes->removeElement($testAllType)) {
+            $testAllType->removeManyToMany2($this);
+        }
+
+        return $this;
     }
 }
 

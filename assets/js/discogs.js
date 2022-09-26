@@ -29,6 +29,7 @@ $(document).ready(function(){
         $('.research-logo').attr('data-item-type',discogsResponse[i].type);
         $('.research-logo').attr('data-item-id',discogsResponse[i].id);
         $('.dj-or-label').html("Juste pour info c'est un "+discogsResponse[i].type);
+        $('#discogs_response_object_name').html("Nom: "+discogsResponse[i].title);
     });
 
     $('.good-answer-ma-man').on('click',function(e){
@@ -41,7 +42,7 @@ $(document).ready(function(){
                 idDiscogs : id,
                 typeDiscogs : type
             },
-            url: "/ajaxLoadVideos"
+            url: "/ajaxSaveReleasesInDB"
         }).done(function(response) {
 
             queryResult = response;
@@ -51,7 +52,6 @@ $(document).ready(function(){
                 videosLinks.push(queryResult[1][i]);
             }
             $('.video-section').append('<p><button type="button" class="open-links-in-new-tab btn btn-light" data-uri='+videosLinks+'>Ouvrir cinq onglets</button> </p>')
-            console.log(queryResult);
         });
 
 

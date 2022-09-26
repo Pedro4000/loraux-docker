@@ -48,10 +48,20 @@ class TestAllTypes
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $datetimeExemple = null;
 
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $nullableDate = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $nullableString = null;
+
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'testAllTypes')]
+    private Collection $ManyToMany2;
+
 
     public function __construct()
     {
         $this->manytomanyExemple = new ArrayCollection();
+        $this->ManyToMany2 = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -187,6 +197,54 @@ class TestAllTypes
     public function setStringExemple(string $stringExemple): self
     {
         $this->stringExemple = $stringExemple;
+
+        return $this;
+    }
+
+    public function getNullableDate(): ?\DateTimeInterface
+    {
+        return $this->nullableDate;
+    }
+
+    public function setNullableDate(?\DateTimeInterface $nullableDate): self
+    {
+        $this->nullableDate = $nullableDate;
+
+        return $this;
+    }
+
+    public function getNullableString(): ?string
+    {
+        return $this->nullableString;
+    }
+
+    public function setNullableString(?string $nullableString): self
+    {
+        $this->nullableString = $nullableString;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getManyToMany2(): Collection
+    {
+        return $this->ManyToMany2;
+    }
+
+    public function addManyToMany2(User $manyToMany2): self
+    {
+        if (!$this->ManyToMany2->contains($manyToMany2)) {
+            $this->ManyToMany2->add($manyToMany2);
+        }
+
+        return $this;
+    }
+
+    public function removeManyToMany2(User $manyToMany2): self
+    {
+        $this->ManyToMany2->removeElement($manyToMany2);
 
         return $this;
     }

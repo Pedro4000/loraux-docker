@@ -28,9 +28,6 @@ class DiscogsVideo
     #[ORM\ManyToOne(inversedBy: 'discogsVideos')]
     private ?Label $label = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $lastTimeFullyScrapped = null;
-
     public function __construct()
     {
         $this->artists = new ArrayCollection();
@@ -100,15 +97,4 @@ class DiscogsVideo
         return $this;
     }
 
-    public function getLastTimeFullyScrapped(): ?\DateTimeInterface
-    {
-        return $this->lastTimeFullyScrapped;
-    }
-
-    public function setLastTimeFullyScrapped(?\DateTimeInterface $lastTimeFullyScrapped): self
-    {
-        $this->lastTimeFullyScrapped = $lastTimeFullyScrapped;
-
-        return $this;
-    }
 }

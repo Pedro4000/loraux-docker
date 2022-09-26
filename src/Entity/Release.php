@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
+use App\Entity\DiscogsClass;
 
 #[ORM\Entity(repositoryClass: ReleaseRepository::class)]
 #[ORM\Table(name: 'release')]
@@ -21,10 +22,11 @@ class Release extends DiscogsClass
         $this->discogsVideos = new ArrayCollection();
     }
 
-    #[ORM\ManyToMany(targetEntity: Label::class, mappedBy:"releases")]
+    
+    #[ORM\ManyToMany(targetEntity: Label::class, inversedBy:"releases")]
     private $labels;
 
-    #[ORM\ManyToMany(targetEntity: Artist::class, mappedBy:"releases")]
+    #[ORM\ManyToMany(targetEntity: Artist::class, inversedBy:"releases")]
     private $artists;
 
     #[ORM\ManyToMany(targetEntity: Track::class, mappedBy:"releases")]
@@ -33,9 +35,11 @@ class Release extends DiscogsClass
     #[ORM\OneToMany(mappedBy: 'release', targetEntity: DiscogsVideo::class)]
     private Collection $discogsVideos;
     
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $releaseDate = null;
 
+    #[ORM\OneToOne(targetEntity: PendingYoutubeTask::class, inversedBy: 'artist')]
+    private $pendingYoutubeTask;
 
     /**
      * @return mixed
@@ -82,7 +86,7 @@ class Release extends DiscogsClass
     {
         if ($this->discogsVideos->contains($discogsVideo)) {
             $this->discogsVideos->removeElement($discogsVideo);
-            $discogsVideo->setRelease(new ArrayCollection());
+            $discogsVideo->setRelease(null);
         }
         return $this;
     }
@@ -151,6 +155,22 @@ class Release extends DiscogsClass
         }
         return $this;
     }
+
+    /**
+	 * @return mixed
+	 */
+	function getPendingYoutubeTask() {
+		return $this->pendingYoutubeTask;
+	}
+	
+	/**
+	 * @param mixed $pendingYoutubeTask 
+	 * @return Release
+	 */
+	function setPendingYoutubeTask($pendingYoutubeTask): self {
+		$this->pendingYoutubeTask = $pendingYoutubeTask;
+		return $this;
+	}
 
     // TODO AJOUTER GETTER SETTERS POUR LA DERNIERE RELATION
 

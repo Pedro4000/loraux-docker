@@ -17,21 +17,22 @@
                         <img src="{{ img }}" onerror="this.src='{{ asset('build/images/no_image.jpg') }}'" class="research-logo" data-item-type="{{ responseContents['results'][0]['type']}}"
                             data-item-id="{{ responseContents['results'][0]['id']}}" >
                     </div>
-                    
-
-                    <p class="dj-or-label">Juste pour info c'est un
+                    <div>
+                        <p class="dj-or-label">Juste pour info c'est un
                             {% if responseContents['results'][0]['type'] == 'artist'%}
                                 artiste
                             {% else %}
                                 {{ responseContents['results'][0]['type'] }}
                             {% endif %}</p>
+                        <p id="discogs_response_object_name">Nom: {{ responseContents['results'][0]['title'] }}</p>
                         <p>Alors c'est ça ?</p>
                         {% if guzzleException %}
                             <p>{{ guzzleException }}</p>
                         {% endif %}
+                    </div>
                 </div>
 
-                <div class="discogs-query-control-pannel" data-pages="{{ discogsQueryInfos.pages }}" data-elements="{{ discogsQueryInfos.totalLength }}">
+                <div class="discogs-query-control-pannel mt-3" data-pages="{{ discogsQueryInfos.pages }}" data-elements="{{ discogsQueryInfos.totalLength }}">
                     <button type="button" class="good-answer-ma-man btn btn-light">Valider</button>
                     <button type="button" class='previous-research-button discogs-research-button btn btn-light'><img class="previous-discogs-image" src="{{ asset('images/keyboard_arrow_left-24px.svg') }}"></button>
                     <button type="button" class='next-research-button discogs-research-button btn btn-light'><img class="next-discogs-image" src="{{ asset('images/keyboard_arrow_right-24px.svg') }}"> </button>

@@ -2,32 +2,33 @@
 
 namespace App\Entity;
 
-use App\Repository\DiscogsClassRepository;
+use App\Repository\ReleaseRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\DBAL\Types\Types;
 
-#[ORM\Entity(repositoryClass: DiscogsClassRepository::class)]
-class DiscogsClass
+abstract class DiscogsClass
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
+    #[ORM\GeneratedValue(strategy:"AUTO")]
     #[ORM\Column]
-    private ?int $id = null;
-
-    #[ORM\Column]
-    private ?int $discogsId = null;
+    protected ?int $id = null;
+    
+    #[ORM\Column(unique:true)]
+    protected ?int $discogsId = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $name = null;
+    protected ?string $name = null;
 
     #[ORM\Column]
-    private ?bool $fullyScrapped = null;
+    protected ?bool $fullyScrapped = null;
+
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    protected ?\DateTimeImmutable $fullyScrappedDate = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
-
-
-    #[ORM\OneToOne(targetEntity: PendingYoutubeTask::class, inversedBy: 'artist')]
-    private $pendingYoutubeTask;
+    protected ?\DateTimeImmutable $createdAt = null;
 
     public function getId(): ?int
     {
@@ -81,19 +82,23 @@ class DiscogsClass
 
         return $this;
     }
+
 	/**
-	 * @return mixed
+	 * @return \DateTimeImmutable
 	 */
-	function getPendingYoutubeTask() {
-		return $this->pendingYoutubeTask;
+	function getFullyScrappedDate(): \DateTimeImmutable 
+    {
+		return $this->fullyScrappedDate;
 	}
 	
 	/**
-	 * @param mixed $pendingYoutubeTask 
+	 * @param \DateTimeImmutable $fullyScrappedDate 
 	 * @return DiscogsClass
 	 */
-	function setPendingYoutubeTask($pendingYoutubeTask): self {
-		$this->pendingYoutubeTask = $pendingYoutubeTask;
+	function setFullyScrappedDate(\DateTimeImmutable $fullyScrappedDate): self 
+    {
+		$this->fullyScrappedDate = $fullyScrappedDate;
 		return $this;
 	}
+
 }

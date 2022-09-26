@@ -6,11 +6,13 @@ use App\Repository\ArtistRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\DiscogsClass;
 
 #[ORM\Entity(repositoryClass: ArtistRepository::class)]
 #[ORM\Table(name: 'artist')]
 class Artist extends DiscogsClass
 {
+
     
     #[ORM\ManyToMany(targetEntity:Release::class, mappedBy:"artists")]
     private Collection $releases;
@@ -20,7 +22,9 @@ class Artist extends DiscogsClass
     
     #[ORM\ManyToMany(targetEntity: DiscogsVideo::class, mappedBy: 'artist')]
     private Collection $discogsVideos;
-    
+
+    #[ORM\OneToOne(targetEntity: PendingYoutubeTask::class, inversedBy: 'artist')]
+    private $pendingYoutubeTask;    
 
     public function __construct()
     {
@@ -28,7 +32,6 @@ class Artist extends DiscogsClass
         $this->tracks = new ArrayCollection();
         $this->discogsVideos = new ArrayCollection();
     }
-    
 
     /**
      * @return mixed
@@ -102,5 +105,21 @@ class Artist extends DiscogsClass
 
         return $this;
     }
+
+    /**
+	 * @return mixed
+	 */
+	function getPendingYoutubeTask() {
+		return $this->pendingYoutubeTask;
+	}
+	
+	/**
+	 * @param mixed $pendingYoutubeTask 
+	 * @return Artist
+	 */
+	function setPendingYoutubeTask($pendingYoutubeTask): self {
+		$this->pendingYoutubeTask = $pendingYoutubeTask;
+		return $this;
+	}
 
 }

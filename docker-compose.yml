@@ -11,6 +11,7 @@ services:
     restart: unless-stopped
     volumes:
       - php_socket:/var/run/php
+      - testcoverage:/var/testcoverage/
     healthcheck:
       interval: 10s
       timeout: 3s
@@ -91,6 +92,7 @@ volumes:
   caddy_data:
   caddy_config:
   db-data:
+  testcoverage:
 
 networks:
   loraux_network:

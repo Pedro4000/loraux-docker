@@ -7,6 +7,7 @@ use App\Entity\Label;
 use App\Entity\Track;
 use App\Entity\Release;
 use Doctrine\Persistence\ManagerRegistry;
+use App\Entity\DiscogsVideo;
 
 class DiscogsService
 {
@@ -16,17 +17,20 @@ class DiscogsService
         $this->em = $doctrine->getManager();
     }
 
-    public function createNewArtist(int $discogsId, string $name) {
+    public function createArtist(int $discogsId, string $name) {
 
-        $newArtist = new Artist();
-        $newArtist->setName($name);
-        $newArtist->setDiscogsId($discogsId);
-        dd($newArtist);
-        $this->em->persist($newArtist);
+        $artist = new Artist();
+        $artist->setDiscogsId($discogsId);
+        $artist->setName($name);
+        $artist->setFullyScrapped(false);
+        $artist->setCreatedAt(new \DateTimeImmutable);
+        $this->em->persist($artist);
         $this->em->flush();
+
+        return $artist;
     }
 
-    public function createNewTrack($track, $trackArtists, $release, $label){
+    public function createTrack($track, $trackArtists, $release){
         $newTrack = new Track();
         if (is_array($trackArtists)) {
             foreach ($trackArtists as $a){
@@ -41,15 +45,20 @@ class DiscogsService
         $this->em->flush();
     }
 
-    public function createNewLabel(int $discogsId, string $name){
-        $newLabel = new Label();
-        $newLabel->setName($name);
-        $newLabel->setDiscogsId($discogsId);
-        $this->em->persist($newLabel);
+    public function createLabel(int $discogsId, string $name){
+        $label = new Label();
+        $label->setName($name);
+        $label->setDiscogsId($discogsId);
+        $label->setFullyScrapped(false);
+        $label->setCreatedAt(new \DateTimeImmutable);
+        $this->em->persist($label);
         $this->em->flush();
+
+        return $label;
     }
 
-    public function createNewRelease($discogsId, $name, $releaseDate, $videos, $label, $artist){
+    public function createRelease($discogsId, $name, $releaseDate, $videos, $labels, $artist){
+
         if ($this->em->getRepository(Release::class)->findOneBy(['discogsId'=>$discogsId])){
             return;
         }
@@ -62,23 +71,33 @@ class DiscogsService
                 $formatedReleaseDate = \DateTime::createFromFormat('Y', $releaseDate);
             }
         }
-        $newRelease = new Release();
-        $newRelease->setName($name);
-        $newRelease->setDiscogsId($discogsId);
-        $newRelease->setReleaseDate($formatedReleaseDate);
+        $release = new Release();
+        $release->setName($name);
+        $release->setDiscogsId($discogsId);
+        $release->setReleaseDate($formatedReleaseDate);
+        $release->setFullyScrappedDate(new \DateTimeImmutable);
+        $release->setCreatedAt(new \DateTimeImmutable);
+        $release->setFullyScrapped(false);
         if ($videos) {
             foreach ($videos as $video){
                 array_push($videosArray, $video['uri']);
             }
         }
-        $newRelease->setVideos($videosArray);
-        $newRelease->addLabel($label);
+        foreach($videosArray as $video) {
+            $discogsVideo = new DiscogsVideo();
+            $discogsVideo->setUrl($video);
+            $this->em->persist($discogsVideo);
+            $release->addDiscogsVideo($discogsVideo);
+        }
+        foreach($release->getLabels() as $label) {
+            $release->addLabel($labels);
+        }
         if (is_array($artist)) {
             foreach ($artist as $a){
-                $newRelease->addArtist($a);
+                $release->addArtist($a);
             }
-        } else {$newRelease->addArtist($artist);}
-        $this->em->persist($newRelease);
+        } else {$release->addArtist($artist);}
+        $this->em->persist($release);
         $this->em->flush();
     }
 
