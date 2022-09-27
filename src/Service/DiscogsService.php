@@ -8,6 +8,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use GuzzleHttp\Client;
 use Google\Service\Container\ReleaseChannelConfig;
 use App\Repository\ArtistRepository;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 
 class DiscogsService
@@ -24,11 +25,80 @@ class DiscogsService
         $this->alreadyCheckedLabels = [];
     }
 
-    public function scrapDiscogsArtist() {
+    public function scrapDiscogsArtist(int $discogsId) {
 
+        $discogsCredentials = 'key='.$this->discogsConsumerKey.'&secret='.$this->discogs_consumer_secret;
+        $baseDiscogsApi = 'https://api.discogs.com/';
+        $page = 1;
+        $guzzleClient = new Client();
+        $artistRepository = $this->doctrine->getRepository(Label::class);
+        $releaseRepository = $this->doctrine->getRepository(Release::class);
+        $now = new \DateTimeImmutable();
+
+        // create artist if not in db
+        if (!$artistRepository->findOneBy([ 'discogsId' => $discogsId])) {
+            $artistInfosResponse = $guzzleClient->request('GET', $baseDiscogsApi.'artists/'.$discogsId.'?'.$discogsCredentials);
+            $artistInfosContent = json_decode($artistInfosResponse->getBody()->getContents(), true);
+            $artist = self::createLabel($artistInfosContent['id'], $artistInfosContent['name']);
+        } else {
+            $artist = $artistRepository->findOneBy([ 'discogsId' => $discogsId]);
+        };
+
+        // ignore if was checked less than 50 days ago
+        if ($artist->isFullyScrapped() && date_diff($artist->getFullyScrappedDate(), $now)->d < 50) {
+            return $artist;
+        }
+
+        $artistReleasesResponse = $guzzleClient->request('GET', $baseDiscogsApi.'artists/'.$discogsId.'/releases?page='.$page.'&'.$discogsCredentials);
+        $remainingRequests = $artistReleasesResponse->getHeaders()['X-Discogs-Ratelimit-Remaining'];
+        if (!$artistReleasesResponse->getStatusCode() == 200) {
+            return new JsonResponse([
+                'status_code' => $artistReleasesResponse->getStatusCode(),
+                'status' => 'error',
+            ]);
+        };
+
+        $artistReleasesContent = json_decode($artistReleasesResponse->getBody()->getContents(), true);
+
+        for ($currentPage = 1; $currentPage <= $artistReleasesContent['pagination']['pages']; $currentPage++) {
+            // if discogs requests limit exceeded then we pause for a minute;
+            // if first page then we already have the discogs artist releases response
+            if (!$currentPage == 1) {
+                if($remainingRequests == 0) {
+                    sleep(60);
+                }
+                $artistReleasesResponse = $guzzleClient->request('GET', $baseDiscogsApi.'artists/'.$discogsId.'/releases?page='.$currentPage.'&'.$discogsCredentials);
+            };
+            for ($currentItemInPage = 0; $currentItemInPage < $artistReleasesContent['pagination']['items']; $currentItemInPage++) {
+                if ($releaseRepository->findOneBy(['discogsId' => $artistReleasesContent['releases'][$currentItemInPage]['id']])) {
+                    continue;
+                } else {
+                    if($remainingRequests == 0) {
+                        sleep(60);
+                    }
+                    //dd($artistReleasesContent);
+                    if ($artistReleasesContent['releases'][$currentItemInPage]['type'] == 'master') {
+                        $releaseId = $artistReleasesContent['releases'][$currentItemInPage]['main_release'];
+                    } else {
+                        $releaseId = $artistReleasesContent['releases'][$currentItemInPage]['id'];
+                    }
+                    $releaseReponse = $guzzleClient->request('GET', $baseDiscogsApi.'releases/'.$releaseId);
+                    $releaseContent = json_decode($releaseReponse->getBody()->getContents(),true);
+                    $remainingRequests = $releaseReponse->getHeaders()['X-Discogs-Ratelimit-Remaining'];
+
+                    self::createRelease($releaseId, 
+                                        $releaseContent['title'],
+                                        $releaseContent['released'],
+                                        $releaseContent['videos'],
+                                        $releaseContent['labels'],
+                                        $releaseContent['artists']);
+                }
+            }
+        }
+        return $artist;        
     }
 
-    public function scrapDiscogsLabel($discogsId) {
+    public function scrapDiscogsLabel(int $discogsId) {
 
         $discogsCredentials = 'key='.$this->discogsConsumerKey.'&secret='.$this->discogs_consumer_secret;
         $baseDiscogsApi = 'https://api.discogs.com/';
@@ -48,7 +118,7 @@ class DiscogsService
         };
 
         // ignore if was checked less than 50 days ago
-        if ($label->isFullyScrapped() && date_diff($labelRepository->find(3)->getFullyScrappedDate(), $now)->d < 50) {
+        if ($label->isFullyScrapped() && date_diff($label->getFullyScrappedDate(), $now)->d < 50) {
             return $label;
         }
 
@@ -83,11 +153,17 @@ class DiscogsService
                     }
                     
                     $releaseId = $labelReleasesContent['releases'][$currentItemInPage]['id'];
+
+                    if ($labelReleasesContent['releases'][$currentItemInPage]['type'] == 'master') {
+                        $releaseId = $labelReleasesContent['releases'][$currentItemInPage]['main_release'];
+                    } else {
+                        $releaseId = $labelReleasesContent['releases'][$currentItemInPage]['id'];
+                    }
                     $releaseReponse = $guzzleClient->request('GET', $baseDiscogsApi.'releases/'.$releaseId);
                     $releaseContent = json_decode($releaseReponse->getBody()->getContents(),true);
                     $remainingRequests = $releaseReponse->getHeaders()['X-Discogs-Ratelimit-Remaining'];
 
-                    self::createRelease($releaseContent['id'], 
+                    self::createRelease($releaseId, 
                                         $releaseContent['title'],
                                         $releaseContent['released'],
                                         $releaseContent['videos'],
@@ -96,15 +172,7 @@ class DiscogsService
                 }
             }
         }
-        // remaining requests before refused
-        // $labelReleasesResponse->getHeaders()['X-Discogs-Ratelimit-Remaining']);
-       
-        // $releasesContent = json_decode($labelReleasesResponse->getBody()->getContents(), true);
-
-        // create if not exist label
-
-        die('ok');
-        
+        return $label;        
     }
 
     public function createArtist(int $discogsId, string $name) {
@@ -113,6 +181,7 @@ class DiscogsService
         $artist->setDiscogsId($discogsId);
         $artist->setName($name);
         $artist->setFullyScrapped(false);
+
         $artist->setCreatedAt(new \DateTimeImmutable);
         $this->em->persist($artist);
         $this->em->flush();
@@ -153,8 +222,7 @@ class DiscogsService
         $releaseRepository = $this->doctrine->getRepository(Release::class);
         $artistRepository = $this->doctrine->getRepository(Artist::class);
 
-        $release = new Release();
-
+        // we create each artist that we dont yet have in db and store them in an array
         foreach ($artists as $artist) {
             if (!array_key_exists($artist['id'], $this->alreadyCheckedArtists)) {
                 $artistFromDb = $artistRepository->findOneBy(['discogsId' => $artist['id']]);
@@ -165,58 +233,48 @@ class DiscogsService
             } else {
                 $artistFromDb = $this->alreadyCheckedArtists[$artist['id']];
             }
-            $release->addArtist($artistFromDb);
         }
-
+        // we create each label that we dont yet have in db and store them in an array
         foreach ($labels as $label) {
             if (!array_key_exists($label['id'], $this->alreadyCheckedLabels)) {
                 $labelFromDb = $labelRepository->findOneBy(['discogsId' => $label['id']]);
                 if(!$labelFromDb) {
-                    $labelFromDb = self::createArtist($label['id'], $label['name']);
+                    $labelFromDb = self::createLabel($label['id'], $label['name']);
                 }
                 $this->alreadyCheckedLabels[$label['id']] = $labelFromDb;
             } else {
                 $labelFromDb = $this->alreadyCheckedLabels[$label['id']];
             }
-            $release->addLabel($labelFromDb);
         }
-        dd($release);
 
-        if ($this->em->getRepository(Release::class)->findOneBy(['discogsId'=>$discogsId])){
-            return;
-        }
-        $videosArray = [];
         if (!$releaseDate){
-            $formatedReleaseDate=null;
+            $formatedReleaseDate = null;
         } else{
             $formatedReleaseDate = \DateTime::createFromFormat('Y-m-d', $releaseDate);
             if (!$formatedReleaseDate) {
                 $formatedReleaseDate = \DateTime::createFromFormat('Y', $releaseDate);
             }
         }
+
         $release = new Release();
+        foreach ($artists as $artist) {
+            $release->addArtist($this->alreadyCheckedArtists[$artist['id']]);
+        }
+        foreach($labels as $label) {
+            $release->addLabel($this->alreadyCheckedLabels[$label['id']]);
+        }
         $release->setName($name);
         $release->setDiscogsId($discogsId);
         $release->setReleaseDate($formatedReleaseDate);
         $release->setFullyScrappedDate(new \DateTimeImmutable);
         $release->setCreatedAt(new \DateTimeImmutable);
         $release->setFullyScrapped(false);
-        if ($videos) {
-            foreach ($videos as $video){
-                array_push($videosArray, $video['uri']);
-            }
-        }
-        foreach($videosArray as $video) {
+
+        foreach($videos as $video) {
             $discogsVideo = new DiscogsVideo();
-            $discogsVideo->setUrl($video);
+            $discogsVideo->setUrl($video['uri']);
             $this->em->persist($discogsVideo);
             $release->addDiscogsVideo($discogsVideo);
-        }
-        foreach($release->getLabels() as $label) {
-            $release->addLabel($labels);
-        }
-        foreach ($artists as $artist){
-            $release->addArtist($artist);
         }
         $this->em->persist($release);
         $this->em->flush();

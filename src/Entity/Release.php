@@ -23,10 +23,10 @@ class Release extends DiscogsClass
     }
 
     
-    #[ORM\ManyToMany(targetEntity: Label::class, inversedBy:"releases")]
+    #[ORM\ManyToMany(targetEntity: Label::class, inversedBy:"releases", cascade:["persist"])]
     private $labels;
 
-    #[ORM\ManyToMany(targetEntity: Artist::class, inversedBy:"releases")]
+    #[ORM\ManyToMany(targetEntity: Artist::class, inversedBy:"releases", cascade:["persist"])]
     private $artists;
 
     #[ORM\ManyToMany(targetEntity: Track::class, mappedBy:"releases")]

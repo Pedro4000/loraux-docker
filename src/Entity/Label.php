@@ -20,7 +20,7 @@ class Label extends DiscogsClass
     }
    
 
-    #[ORM\ManyToMany(targetEntity: Release::class, mappedBy:"labels")]
+    #[ORM\ManyToMany(targetEntity: Release::class, mappedBy:"labels", cascade:["persist"])]
     private Collection $releases;
 
 

@@ -57,11 +57,18 @@ class TestAllTypes
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'testAllTypes')]
     private Collection $ManyToMany2;
 
+    #[ORM\ManyToMany(targetEntity: Track::class)]
+    private Collection $ManyToManyNullablke;
+
+    #[ORM\Column(length: 255)]
+    private ?string $exit = null;
+
 
     public function __construct()
     {
         $this->manytomanyExemple = new ArrayCollection();
         $this->ManyToMany2 = new ArrayCollection();
+        $this->ManyToManyNullablke = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -245,6 +252,42 @@ class TestAllTypes
     public function removeManyToMany2(User $manyToMany2): self
     {
         $this->ManyToMany2->removeElement($manyToMany2);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Track>
+     */
+    public function getManyToManyNullablke(): Collection
+    {
+        return $this->ManyToManyNullablke;
+    }
+
+    public function addManyToManyNullablke(Track $manyToManyNullablke): self
+    {
+        if (!$this->ManyToManyNullablke->contains($manyToManyNullablke)) {
+            $this->ManyToManyNullablke->add($manyToManyNullablke);
+        }
+
+        return $this;
+    }
+
+    public function removeManyToManyNullablke(Track $manyToManyNullablke): self
+    {
+        $this->ManyToManyNullablke->removeElement($manyToManyNullablke);
+
+        return $this;
+    }
+
+    public function getExit(): ?string
+    {
+        return $this->exit;
+    }
+
+    public function setExit(string $exit): self
+    {
+        $this->exit = $exit;
 
         return $this;
     }
