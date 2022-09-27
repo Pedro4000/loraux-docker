@@ -83,7 +83,7 @@ class IndexController extends AbstractController
     #[Route('/ajaxSaveReleasesInDB', name: 'ajaxSaveReleasesInDB')]
     public function ajaxSaveReleasesInDBAction(Request $request, ManagerRegistry $doctrine, DiscogsService $discogsService)
     {
-        $idDiscogs = $request->query->get('idDiscogs');
+        $discogsId = $request->query->get('discogsId');
         $em = $doctrine->getManager();
         $typeDiscogsQuery = $request->query->get('typeDiscogs');
         $discogsCredentials = 'key='.$this->getParameter('discogs_consumer_key').'&secret='.$this->getParameter('discogs_consumer_secret');
@@ -95,28 +95,12 @@ class IndexController extends AbstractController
         $this->session->set('videosToPutInPlaylist','');
 
         
+        
         // SI ON A DU CONTENU ALORS ON VA LISTER LES RELEASE PAR TYPE DOBJET
         $client = new Client();
         if ($typeDiscogsQuery == 'label') {
-            $labelReleasesResponse = $client->request('GET', $baseDiscogsApi.'labels/'.$idDiscogs.'/releases?'.$discogsCredentials.'&per_page=50');
-            $artistInfosResponse = $client->request('GET', $baseDiscogsApi.'labels/'.$idDiscogs.'?'.$discogsCredentials);
-            
-            if (!$labelInfosResponse->getStatusCode() == 200 || !$labelReleasesResponse->getStatusCode() == 200) {
-                return new JsonResponse([
-                    'status_code' => $labelReleasesResponse->getStatusCode(),
-                    'status' => 'error',
-                ]);
-            };
-            
-            $releasesContent = json_decode($labelReleasesResponse->getBody()->getContents(), true);
-            $labelInfosContent = json_decode($labelInfosResponse->getBody()->getContents(), true);
-            $labelRepository = $doctrine->getRepository(Label::class);
 
-            if (!$doctrine->getRepository(Label::class)->findOneBy([ 'discogsId' => $labelInfosContent['id']])) {
-                $discogsService->createLabel($labelInfosContent['id'], $labelInfosContent['name']);
-            };
-            $labelFromDb = $doctrine->getRepository(Label::class)->findOneBy([ 'discogsId' => $labelInfosContent['id']]);
-
+            $discogsService->scrapDiscogsLabel($discogsId);
 
         } elseif ($typeDiscogsQuery == 'artist') {
             $artistsReleasesResponse = $client->request('GET', $baseDiscogsApi.'artists/'.$idDiscogs.'/releases?'.$discogsCredentials);
@@ -158,10 +142,10 @@ class IndexController extends AbstractController
         }
         */
 
-        dd($releaseContent);
         
         // ICI ON VIENT CHERCHER LES VIDEOS UNES A UNES
         if (!empty($releasesContent)) {
+            /*
             for ($j=1; $j<= $releasesContent['pagination']['pages']; $j++) {
                 if ($j<>1) {
                     $resSpec = $client->request('GET', $baseDiscogsApi.'labels/'.$id.'/releases?'.$discogsCredentials.'&page='.$j.'&per_page=50');
@@ -234,7 +218,7 @@ class IndexController extends AbstractController
                                 //on créer l'artiste si inexistant
                                 if (!$doctrine
                                     ->getRepository(Artist::class)
-                                    ->findOneBy([ 'discogsId' => $releaseInfos['artists'][0]['id']])) {
+                                    https://github.com/Pedro4000                    ->findOneBy([ 'discogsId' => $releaseInfos['artists'][0]['id']])) {
                                     $discogsService->createArtist($releaseInfos['artists'][0]['id'], $artistInfos['name']);
                                 }
                                 $releaseArtist = $doctrine->getRepository(Artist::class)
@@ -292,7 +276,7 @@ class IndexController extends AbstractController
                                 $em->flush();
                                 sleep(2);
                             }
-                        } catch (ClientException $exception) {
+                        } catch (ClientException $ignored) {
                             $guzzleException = $exception->getMessage();
                             sleep(10);
                         }
@@ -300,6 +284,7 @@ class IndexController extends AbstractController
                     $this->session->set('videosToPutInPlaylist',$videosArray);
                 }
             }
+            */
 
         }
 

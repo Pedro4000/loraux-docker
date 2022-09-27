@@ -22,5 +22,13 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
+    App\Service\DiscogsService:
+        arguments:
+            # the '@' symbol is important: that's what tells the container
+            # you want to pass the *service* whose id is 'monolog.logger.request',
+            # and not just the *string* 'monolog.logger.request'
+            $discogsConsumerKey: '%discogs_consumer_key%'
+            $discogs_consumer_secret: '%discogs_consumer_secret%'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

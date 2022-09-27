@@ -39,7 +39,7 @@ $(document).ready(function(){
 
         $.ajax({
             data: {
-                idDiscogs : id,
+                discogsId : id,
                 typeDiscogs : type
             },
             url: "/ajaxSaveReleasesInDB"
