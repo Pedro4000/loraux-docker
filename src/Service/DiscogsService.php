@@ -44,10 +44,12 @@ class DiscogsService
             $artist = $artistRepository->findOneBy([ 'discogsId' => $discogsId]);
         };
 
+        /*
         // ignore if was checked less than 50 days ago
         if ($artist->isFullyScrapped() && date_diff($artist->getFullyScrappedDate(), $now)->d < 50) {
             return $artist;
         }
+        */
 
         $artistReleasesResponse = $guzzleClient->request('GET', $baseDiscogsApi.'artists/'.$discogsId.'/releases?page='.$page.'&'.$discogsCredentials);
         $remainingRequests = $artistReleasesResponse->getHeaders()['X-Discogs-Ratelimit-Remaining'];
@@ -60,41 +62,52 @@ class DiscogsService
 
         $artistReleasesContent = json_decode($artistReleasesResponse->getBody()->getContents(), true);
 
+        $counter = 0;
         for ($currentPage = 1; $currentPage <= $artistReleasesContent['pagination']['pages']; $currentPage++) {
             // if discogs requests limit exceeded then we pause for a minute;
             // if first page then we already have the discogs artist releases response
-            if (!$currentPage == 1) {
-                if($remainingRequests == 0) {
+            
+            if ($currentPage != 1) {
+                if($remainingRequests == 1) {
                     sleep(60);
                 }
                 $artistReleasesResponse = $guzzleClient->request('GET', $baseDiscogsApi.'artists/'.$discogsId.'/releases?page='.$currentPage.'&'.$discogsCredentials);
+                $artistReleasesContent = json_decode($artistReleasesResponse->getBody()->getContents(), true);
             };
-            for ($currentItemInPage = 0; $currentItemInPage < $artistReleasesContent['pagination']['items']; $currentItemInPage++) {
-                if ($releaseRepository->findOneBy(['discogsId' => $artistReleasesContent['releases'][$currentItemInPage]['id']])) {
+            
+            for ($currentItemInPage = 0; $currentItemInPage < count($artistReleasesContent['releases']); $currentItemInPage++) {
+                $counter++;
+
+                if ($artistReleasesContent['releases'][$currentItemInPage]['type'] == 'master') {
+                    $releaseId = $artistReleasesContent['releases'][$currentItemInPage]['main_release'];
+                } elseif($artistReleasesContent['releases'][$currentItemInPage]['type'] == 'release') {
+                    $releaseId = $artistReleasesContent['releases'][$currentItemInPage]['id'];
+                }
+
+                if ($releaseRepository->findOneBy(['discogsId' => $releaseId])) {
                     continue;
                 } else {
-                    if($remainingRequests == 0) {
+
+                    if ($remainingRequests < 2) {
                         sleep(60);
                     }
-                    //dd($artistReleasesContent);
-                    if ($artistReleasesContent['releases'][$currentItemInPage]['type'] == 'master') {
-                        $releaseId = $artistReleasesContent['releases'][$currentItemInPage]['main_release'];
-                    } else {
-                        $releaseId = $artistReleasesContent['releases'][$currentItemInPage]['id'];
-                    }
+
                     $releaseReponse = $guzzleClient->request('GET', $baseDiscogsApi.'releases/'.$releaseId);
+                    sleep(2);
                     $releaseContent = json_decode($releaseReponse->getBody()->getContents(),true);
                     $remainingRequests = $releaseReponse->getHeaders()['X-Discogs-Ratelimit-Remaining'];
 
+
                     self::createRelease($releaseId, 
                                         $releaseContent['title'],
-                                        $releaseContent['released'],
-                                        $releaseContent['videos'],
+                                        $releaseContent['released'] ?? null,
+                                        $releaseContent['videos'] ?? [],
                                         $releaseContent['labels'],
                                         $releaseContent['artists']);
                 }
             }
         }
+        dd($counter);
         return $artist;        
     }
 
@@ -133,32 +146,32 @@ class DiscogsService
 
         $labelReleasesContent = json_decode($labelReleasesResponse->getBody()->getContents(), true);
 
+        
         for ($currentPage = 1; $currentPage <= $labelReleasesContent['pagination']['pages']; $currentPage++) {
             // if discogs requests limit exceeded then we pause for a minute;
             // if first page then we already have the discogs label releases response
-            if (!$currentPage == 1) {
-                if($remainingRequests == 0) {
+            if ($currentPage != 1) {
+                if($remainingRequests == 1) {
                     sleep(60);
                 }
                 $labelReleasesResponse = $guzzleClient->request('GET', $baseDiscogsApi.'labels/'.$discogsId.'/releases?page='.$currentPage.'&'.$discogsCredentials);
             };
             
-            for ($currentItemInPage = 0; $currentItemInPage < $labelReleasesContent['pagination']['items']; $currentItemInPage++) {
-                if ($releaseRepository->findOneBy(['discogsId' => $labelReleasesContent['releases'][$currentItemInPage]['id']])) {
+            for ($currentItemInPage = 0; $currentItemInPage < count($labelReleasesContent['releases']); $currentItemInPage++) {
+                if ($labelReleasesContent['releases'][$currentItemInPage]['type'] == 'master') {
+                    $releaseId = $labelReleasesContent['releases'][$currentItemInPage]['main_release'];
+                } else {
+                    $releaseId = $labelReleasesContent['releases'][$currentItemInPage]['id'];
+                }
+                if ($releaseRepository->findOneBy(['discogsId' => $releaseId])) {
                     continue;
                 } else {
 
-                    if($remainingRequests == 0) {
+                    if ($remainingRequests == 1) {
                         sleep(60);
                     }
-                    
                     $releaseId = $labelReleasesContent['releases'][$currentItemInPage]['id'];
 
-                    if ($labelReleasesContent['releases'][$currentItemInPage]['type'] == 'master') {
-                        $releaseId = $labelReleasesContent['releases'][$currentItemInPage]['main_release'];
-                    } else {
-                        $releaseId = $labelReleasesContent['releases'][$currentItemInPage]['id'];
-                    }
                     $releaseReponse = $guzzleClient->request('GET', $baseDiscogsApi.'releases/'.$releaseId);
                     $releaseContent = json_decode($releaseReponse->getBody()->getContents(),true);
                     $remainingRequests = $releaseReponse->getHeaders()['X-Discogs-Ratelimit-Remaining'];

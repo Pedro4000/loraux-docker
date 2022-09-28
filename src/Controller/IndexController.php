@@ -51,6 +51,7 @@ class IndexController extends AbstractController
         $discogsQueryInfos = [];
         $guzzleException='';
 
+
         /* auth of type "https://api.discogs.com/database/search?q=Nirvana&key=foo123&secret=bar456" */
 
         // PREMIERE RECHERCHE AFIN DE TROUVER LOBJET VOULU
@@ -94,8 +95,6 @@ class IndexController extends AbstractController
         $videosArray['releases'] = [];
         $this->session->set('videosToPutInPlaylist','');
 
-        
-        
         // SI ON A DU CONTENU ALORS ON VA LISTER LES RELEASE PAR TYPE DOBJET
         $client = new Client();
         if ($typeDiscogsQuery == 'label') {
