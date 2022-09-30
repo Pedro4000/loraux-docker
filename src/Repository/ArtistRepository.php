@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Artist;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Knp\Component\Pager\PaginatorInterface;
 
 /**
  * @method Artist|null find($id, $lockMode = null, $lockVersion = null)
@@ -14,9 +15,32 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class ArtistRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, PaginatorInterface $paginator)
     {
+        $this->paginator = $paginator;
         parent::__construct($registry, Artist::class);
+    }
+
+    // among parameters int page, int size
+    public function getArtistsByParams($params) {
+       
+        extract($params);
+
+        $entityManager = $this->getEntityManager();
+        
+        $query = $entityManager->createQuery(
+            'SELECT a
+            FROM App\Entity\Artist a
+            '
+        );
+        
+        $pagination = $this->paginator->paginate(
+            $query, /* query NOT result */
+            $page, /*page number*/
+            $size /*limit per page*/
+        );
+
+        return $pagination;
     }
 
     // /**

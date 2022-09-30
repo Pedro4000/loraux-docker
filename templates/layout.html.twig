@@ -14,8 +14,12 @@
     <main class="p-0 d-flex">
         {% block sidebar %}
            <div id="sidebar" class="min-vh-100 w-15 float-left p-4 b-1 border border-right border-darek">
-                <ul class="p-0">
-                    <li class="mt-2 btn btn-outline-dark" style="border:none !important">Musique</li>
+                <ul class="p-0 d-flex flex-column">
+                    <li class="mt-2 btn btn-outline-dark {{ ('Music' in app.request.attributes.get("_controller")) ? 'active' : '' }}" style="border:none !important">Musique</li>
+                    <div class="d-flex flex-column justify-center">
+                        <li class="text-center m-1"><a href="{{ path('music.artist_index') }}" class="btn btn-outline-dark text-sm {{ ('artist' in app.request.attributes.get("_controller")) ? 'active' : '' }}">Artistes</a></li>
+                        <li class="text-center m-1"><a href="{{ path('music.label_index') }}" class="btn btn-outline-dark text-sm {{ ('label' in app.request.attributes.get("_controller")) ? 'active' : '' }}">Labels</a></li>
+                    </div>
                     <li class="mt-2 btn btn-outline-dark" style="border:none !important">Films</li>
                     <li class="mt-2 btn btn-outline-dark" style="border:none !important">Livres</li>
                 </ul>

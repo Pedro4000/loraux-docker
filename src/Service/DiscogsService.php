@@ -107,7 +107,7 @@ class DiscogsService
                 }
             }
         }
-        dd($counter);
+
         return $artist;        
     }
 

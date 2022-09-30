@@ -3,6 +3,7 @@
 {% block page_content %}
     <div class="main_content p-3">
         <section class="discogs-research-section p-4">
+            <p>Ici c'est pour rechercher et puis aller chercher les données depuis Discogs</p>
             <form method="post" >
                 <label for="query">Votre recherche</label>
                 <input type="text" id="query-discogs" name="query-discogs">
@@ -33,7 +34,7 @@
                 </div>
 
                 <div class="discogs-query-control-pannel mt-3" data-pages="{{ discogsQueryInfos.pages }}" data-elements="{{ discogsQueryInfos.totalLength }}">
-                    <button type="button" class="good-answer-ma-man btn btn-light">Valider</button>
+                    <button type="button" class="good-answer-ma-man btn btn-light">Scrapper</button>
                     <button type="button" class='previous-research-button discogs-research-button btn btn-light'><img class="previous-discogs-image" src="{{ asset('images/keyboard_arrow_left-24px.svg') }}"></button>
                     <button type="button" class='next-research-button discogs-research-button btn btn-light'><img class="next-discogs-image" src="{{ asset('images/keyboard_arrow_right-24px.svg') }}"> </button>
                 </div>

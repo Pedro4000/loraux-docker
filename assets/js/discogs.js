@@ -46,12 +46,8 @@ $(document).ready(function(){
         }).done(function(response) {
 
             queryResult = response;
+            console.log(response);
 
-            $('.video-section').append('<p><a href="http://127.0.0.1:8000/createYoutubePlaylist">Créer la playlist</a> </p>')
-            for (i = 0; i < 5; i++) {
-                videosLinks.push(queryResult[1][i]);
-            }
-            $('.video-section').append('<p><button type="button" class="open-links-in-new-tab btn btn-light" data-uri='+videosLinks+'>Ouvrir cinq onglets</button> </p>')
         });
 
 

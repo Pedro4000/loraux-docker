@@ -20,8 +20,9 @@ use Google\Service\ToolResults\PendingGoogleUpdateInsight;
 use App\Entity\PendingYoutubeTask;
 use Symfony\Component\Form\ChoiceList\ArrayChoiceList;
 use Doctrine\Common\Collections\ArrayCollection;
+use App\Repository\ArtistRepository;
 
-class IndexController extends AbstractController
+class MusicController extends AbstractController
 {
     private $params;
     private $client;
@@ -103,8 +104,7 @@ class IndexController extends AbstractController
             $artist = $discogsService->scrapDiscogsArtist($discogsId);
         }
 
-        die('ok');
-        return new JsonResponse([$guzzleException, $videosArray]);
+        return new JsonResponse('cool');
     }
 
 
@@ -150,6 +150,29 @@ class IndexController extends AbstractController
             'userForm'=> $userForm->createView()
         ]);
     }
+
+
+    #[Route('/music/artist/index', name: 'music.artist_index')]
+    public function artistIndex(ManagerRegistry $doctrine, ArtistRepository $artistRepository) {
+        
+        $page = $_GET['page'] ?? 1;
+        $size = 50;
+
+        $params = compact('page', 'size');
+
+        $artists = $artistRepository->getArtistsByParams($params);
+
+        return $this->render('artist/index.html.twig',[
+            'artists' => $artists,
+        ]);
+    }
+
+
+    #[Route('/music/label/index', name: 'music.label_index')]
+    public function labelIndex() {
+        die('ok');
+    }
+    
 
     /**
      * @Route("/google_redirect_for_calendar", name="google_redirect_for_calendar")

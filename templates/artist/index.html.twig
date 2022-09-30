@@ -1,0 +1,29 @@
+{% extends 'layout.html.twig' %}
+
+{% block page_content %}
+    <div class="main_content w-80 flex justify-center p-3">
+    <table class="table">
+        <thead>
+            <tr>
+            <th scope="col">#</th>
+            <th scope="col">Id Discogs</th>
+            <th scope="col">Nom</th>
+            <th scope="col">Fully scrapped</th>
+            <th scope="col">Fully scrapped date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for artist in artists %}
+                <tr>
+                    <th scope="row">{{ artist.id }}</th>
+                    <td>{{ artist.discogsId }}</td>
+                    <td>{{ artist.name }}</td>
+                    <td>{{ artist.fullyScrapped == 1 ? 'true' : 'false' }}</td>
+                    <td>{{ artist.fullyScrapped == 1 ? artist.fullyScrappedDate : '' }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div>
+
+{% endblock %}
