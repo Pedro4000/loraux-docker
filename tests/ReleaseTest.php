@@ -4,7 +4,8 @@ namespace App\Tests;
 
 use PHPUnit\Framework\TestCase;
 use App\Entity\{DiscogsVideo, Artist, Release, Label, Track};
-use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\{ArrayCollection, Collection};
+
 
 class ReleaseTest extends TestCase
 {
@@ -62,20 +63,6 @@ class ReleaseTest extends TestCase
         $this->assertTrue($release->getReleaseDate() == $now);
 
     }
-    #[ORM\ManyToMany(targetEntity: Label::class, mappedBy:"releases")]
-    private $labels;
-
-    #[ORM\ManyToMany(targetEntity: Artist::class, mappedBy:"releases")]
-    private $artists;
-
-    #[ORM\ManyToMany(targetEntity: Track::class, mappedBy:"releases")]
-    private $tracks;
-
-    #[ORM\OneToMany(mappedBy: 'release', targetEntity: DiscogsVideo::class)]
-    private Collection $discogsVideos;
-
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $releaseDate = null;
 
     public function testIsFalse(): void
     {

@@ -30,15 +30,6 @@ class LabelTest extends TestCase
 
     }
 
-    
-    #[ORM\ManyToMany(targetEntity: Release::class, mappedBy:"labels")]
-    private $releases;
-
-
-    #[ORM\OneToMany(mappedBy: 'label', targetEntity: DiscogsVideo::class)]
-    private Collection $discogsVideos;
-    
-
     public function testIsFalse(): void
     {
         $label = new Label();

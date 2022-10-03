@@ -15,9 +15,10 @@ use Knp\Component\Pager\PaginatorInterface;
  */
 class ArtistRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry, PaginatorInterface $paginator)
+    public function __construct(
+        private ManagerRegistry $registry, 
+        private PaginatorInterface $paginator)
     {
-        $this->paginator = $paginator;
         parent::__construct($registry, Artist::class);
     }
 
@@ -31,6 +32,7 @@ class ArtistRepository extends ServiceEntityRepository
         $query = $entityManager->createQuery(
             'SELECT a
             FROM App\Entity\Artist a
+            ORDER BY a.id
             '
         );
         

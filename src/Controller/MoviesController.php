@@ -38,8 +38,12 @@ use Symfony\Component\HttpFoundation\RequestStack;
 class MoviesController extends AbstractController
 {
     private $params;
-    private $client;
     public $em;
+    
+    private Google_Client $client;
+    private RequestStack $requestStack;
+    private $session;
+    private $discogsService;
 
     public function __construct (Google_Client $client, ParameterBagInterface $params, DiscogsService $discogsService, RequestStack $requestStack)
     {

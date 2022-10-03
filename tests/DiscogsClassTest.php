@@ -3,13 +3,13 @@
 namespace App\Tests;
 
 use PHPUnit\Framework\TestCase;
-use App\Entity\DiscogsClass;
+use App\Entity\Artist;
 
 class DiscogsClassTest extends TestCase
 {
     public function testIsTrue(): void
     {
-        $discogsClass = new DiscogsClass();
+        $discogsClass = new Artist();
         $now = new \DateTimeImmutable('now');
         
         $discogsClass->setName('un')
@@ -26,7 +26,7 @@ class DiscogsClassTest extends TestCase
 
     public function testIsfalse(): void
     {
-        $discogsClass = new DiscogsClass();
+        $discogsClass = new Artist();
         $now = new \DateTimeImmutable('now');
         
         $discogsClass->setName('un')
@@ -42,7 +42,7 @@ class DiscogsClassTest extends TestCase
 
     public function testIsEmpty(): void
     {
-        $discogsClass = new DiscogsClass();
+        $discogsClass = new Artist();
 
         $this->assertEmpty($discogsClass->getName());
         $this->assertEmpty($discogsClass->getDiscogsId());

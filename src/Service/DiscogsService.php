@@ -31,15 +31,14 @@ class DiscogsService
         $baseDiscogsApi = 'https://api.discogs.com/';
         $page = 1;
         $guzzleClient = new Client();
-        $artistRepository = $this->doctrine->getRepository(Label::class);
+        $artistRepository = $this->doctrine->getRepository(Artist::class);
         $releaseRepository = $this->doctrine->getRepository(Release::class);
-        $now = new \DateTimeImmutable();
 
         // create artist if not in db
         if (!$artistRepository->findOneBy([ 'discogsId' => $discogsId])) {
             $artistInfosResponse = $guzzleClient->request('GET', $baseDiscogsApi.'artists/'.$discogsId.'?'.$discogsCredentials);
             $artistInfosContent = json_decode($artistInfosResponse->getBody()->getContents(), true);
-            $artist = self::createLabel($artistInfosContent['id'], $artistInfosContent['name']);
+            $artist = self::createArtist($artistInfosContent['id'], $artistInfosContent['name']);
         } else {
             $artist = $artistRepository->findOneBy([ 'discogsId' => $discogsId]);
         };
@@ -106,8 +105,12 @@ class DiscogsService
                                         $releaseContent['artists']);
                 }
             }
-        }
 
+        }
+        $artist->setFullyScrapped(true)->setFullyScrappedDate(new \DateTimeImmutable());
+        $this->em->persist($artist);
+        $this->em->flush();
+       
         return $artist;        
     }
 

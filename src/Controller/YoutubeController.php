@@ -17,33 +17,19 @@ use Google_Service_YouTube_PlaylistItemSnippet;
 use Google_Service_YouTube_ResourceId;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\HttpKernel\HttpKernel;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use GuzzleHttp\Client;
-use GuzzleHttp\Command\Guzzle\Description;
-use GuzzleHttp\Command\Guzzle\GuzzleClient;
-use Guzzle\Http\Exception\ClientErrorResponseException;
-use GuzzleHttp\Exception\ClientException;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 
 class YoutubeController extends AbstractController
 {
-    private $params;
-    private $client;
-    public $em;
 
-    public function __construct(Google_Client $client, ParameterBagInterface $params)
-    {
-        $this->client = $client;
-        $this->params = $params;
-        $this->session = $session;
-    }
+    public function __construct(
+        private Google_Client $client, 
+        private ParameterBagInterface $params,
+        private RequestStack $requestStack,
+        private $session = $requestStack->getSession(),
+        ) { }
 
 
     /**

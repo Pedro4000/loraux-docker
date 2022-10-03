@@ -24,20 +24,13 @@ use App\Repository\ArtistRepository;
 
 class MusicController extends AbstractController
 {
-    private $params;
-    private $client;
-    public $em;
 
-
-    public function __construct (Google_Client $client, ParameterBagInterface $params, DiscogsService $discogsService, RequestStack $requestStack)
-    {
-        $this->client = $client;
-        $this->params = $params;
-        $discogsService = $discogsService;
-        $this->requestStack = $requestStack;
-        $this->session = $this->requestStack->getSession();
-
-    }
+    public function __construct (
+        private Google_Client $client, 
+        private ParameterBagInterface $params, 
+        private DiscogsService $discogsService, 
+        private RequestStack $requestStack
+    ) { }
 
     
     #[Route('/', name: 'index')]
@@ -83,18 +76,13 @@ class MusicController extends AbstractController
     }
 
     #[Route('/ajaxSaveReleasesInDB', name: 'ajaxSaveReleasesInDB')]
-    public function ajaxSaveReleasesInDBAction(Request $request, ManagerRegistry $doctrine, DiscogsService $discogsService)
+    public function ajaxSaveReleasesInDBAction(Request $request, ManagerRegistry $doctrine, DiscogsService $discogsService, RequestStack $requestStack)
     {
         $discogsId = $request->query->get('discogsId');
         $em = $doctrine->getManager();
         $typeDiscogsQuery = $request->query->get('typeDiscogs');
-        $discogsCredentials = 'key='.$this->getParameter('discogs_consumer_key').'&secret='.$this->getParameter('discogs_consumer_secret');
-        $baseDiscogsApi = 'https://api.discogs.com/';
-        $releasesContent = [];
-        $videosArray = [];
-        $guzzleException= '';
-        $videosArray['releases'] = [];
-        $this->session->set('videosToPutInPlaylist','');
+        $session = $requestStack->getSession();
+        $session->set('videosToPutInPlaylist','');
 
         // SI ON A DU CONTENU ALORS ON VA LISTER LES RELEASE PAR TYPE DOBJET
         $client = new Client();
@@ -152,11 +140,12 @@ class MusicController extends AbstractController
     }
 
 
-    #[Route('/music/artist/index', name: 'music.artist_index')]
-    public function artistIndex(ManagerRegistry $doctrine, ArtistRepository $artistRepository) {
+    #[Route('/music/artist/index', name: 'music.artist.index')]
+    public function artistIndex(ManagerRegistry $doctrine, ArtistRepository $artistRepository) 
+    {
         
         $page = $_GET['page'] ?? 1;
-        $size = 50;
+        $size = 20;
 
         $params = compact('page', 'size');
 
@@ -167,8 +156,20 @@ class MusicController extends AbstractController
         ]);
     }
 
+    #[Route('/music/artist/show/{id}', name: 'music.artist.show')]
+    public function artistShow(int $id, ManagerRegistry $doctrine, ArtistRepository $artistRepository) 
+    {
+        $discogsCredentials = 'key='.$this->getParameter('discogs_consumer_key').'&secret='.$this->getParameter('discogs_consumer_secret');
+        $baseDiscogsApi = 'https://api.discogs.com/';
 
-    #[Route('/music/label/index', name: 'music.label_index')]
+        $artist = $artistRepository->find($id);
+        return $this->render('artist/show.html.twig',[
+            'artist' => $artist,
+        ]);
+    }
+
+
+    #[Route('/music/label/index', name: 'music.label.index')]
     public function labelIndex() {
         die('ok');
     }
@@ -182,7 +183,8 @@ class MusicController extends AbstractController
     public function getGoogleCalendarRedirectInformationAction (Request $request, CalendarService $calendarService) {
 
         $request->getPathInfo();
-        $this->session->set('auth_code',$request->query->get('code'));
+        $session = $this->requestStack->getSession();
+        $session->set('auth_code',$request->query->get('code'));
         $google_code = $request->query->get('code');
         $dateTimeNow = new \DateTime();
         $dateTime3339 = $dateTimeNow->format("Y-m-d\TH:i:sP");
@@ -196,9 +198,9 @@ class MusicController extends AbstractController
         $client->setRedirectUri('http://127.0.0.1:8000/google_redirect_for_calendar');
 
         // if an access token has already been set in session
-        if ($this->session->get('access_token')) {
+        if ($session->get('access_token')) {
 
-            $client->setAccessToken($this->session->get('access_token'));
+            $client->setAccessToken($session->get('access_token'));
             if ($client->isAccessTokenExpired()) {
                 if ($client->getRefreshToken()) {
                     $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
@@ -207,7 +209,7 @@ class MusicController extends AbstractController
                     if ($request->query->get('code')){
                         $accessToken = $client->fetchAccessTokenWithAuthCode($google_code);
                         $client->setAccessToken($accessToken);
-                        $this->session->set('access_token',$accessToken);
+                        $session->set('access_token',$accessToken);
                     }
                 }
                 $service = new Google_Service_Calendar($client);
@@ -221,7 +223,7 @@ class MusicController extends AbstractController
         elseif ($request->query->get('code')) {
             $accessToken = $client->fetchAccessTokenWithAuthCode($google_code);
             $client->setAccessToken($accessToken);
-            $this->session->set('access_token',$accessToken);
+            $session->set('access_token',$accessToken);
         }
         else {
             $authUrl = $client->createAuthUrl();
