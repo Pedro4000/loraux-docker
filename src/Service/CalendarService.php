@@ -3,80 +3,48 @@
 namespace App\Service ;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
-use Carbon\Carbon;
+use Symfony\Component\HttpFoundation\{RequestStack, Request, JsonResponse};
 use Google_Client;
 use Google_Service_Calendar;
-use Google_Service_Calendar_Event;
-use Google_Service_Calendar_EventDateTime;
-use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-
-
 
 
 class CalendarService extends AbstractController
 {
-    /**
-     * @var Google_Client
-     */
-    protected $client;
-    /**
-     * @var SessionInterface
-     */
-    private $session;
 
-    public function __construct(RequestStack $requestStack, UrlGeneratorInterface $router)
+
+    public function __construct(
+        private RequestStack $requestStack, 
+        private UrlGeneratorInterface $router,
+        ) { }
+
+    
+    public function createGoogleClient($client = null)
     {
-
-        $this->requestStack = $requestStack;
-        $this->session = $this->requestStack->getSession();
-        $this->router = $router;
-        /*        dump(4);die;
+        $session = $this->requestStack->getSession();
+        $session->set('auth_code', null);
         $client = new Google_Client();
-        $client->setAuthConfig('client_secret.json');
+        $client->setAuthConfig('credentials.json');
         $client->addScope(Google_Service_Calendar::CALENDAR);
 
         $guzzleClient = new \GuzzleHttp\Client(array('curl' => array(CURLOPT_SSL_VERIFYPEER => false)));
         $client->setHttpClient($guzzleClient);
-        $this->client = $client;*/
-    }
-
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     * @throws \Google_Exception
-     */
-    public function createGoogleClient($client = null)
-    {
-            $this->session->set('auth_code', null);
-            $client = new Google_Client();
-            $client->setAuthConfig('credentials.json');
-            $client->addScope(Google_Service_Calendar::CALENDAR);
-
-            $guzzleClient = new \GuzzleHttp\Client(array('curl' => array(CURLOPT_SSL_VERIFYPEER => false)));
-            $client->setHttpClient($guzzleClient);
-            $client->setRedirectUri('http://127.0.0.1:8000/google_redirect_for_calendar');
-            $authUrl = $client->createAuthUrl();
+        $client->setRedirectUri('http://127.0.0.1:8000/google_redirect_for_calendar');
+        $authUrl = $client->createAuthUrl();
 
 
-        if ($this->session->get('access_token')) {
-           $client->setAccessToken($this->session->get('access_token'));
+        if ($session->get('access_token')) {
+           $client->setAccessToken($session->get('access_token'));
            if ($client->isAccessTokenExpired()) {
                // Refresh the token if possible, else fetch a new one.
                if ($client->getRefreshToken()) {
 
                    $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
                } else {
-                   $this->oauth($client);
+                   $this->oAuth($client);
                }
            }
-            $client->setAccessToken($this->session->get('access_token'));
+            $client->setAccessToken($session->get('access_token'));
             $service = new Google_Service_Calendar($client);
             $calendarId = 'primary';
             $results = $service->events->listEvents($calendarId);
@@ -84,19 +52,20 @@ class CalendarService extends AbstractController
         }
     }
 
-    public function oauth($client)
+    public function oAuth($client)
     {
+        $session = $this->requestStack->getSession();
         $redirectUri = 'https%3A%2F%2Fdevelopers.google.com%2Foauthplayground';
         $stringUri = 'http://127.0.0.1:8000/google_redirect_for_calendar';
         $client->setRedirectUri($stringUri);
 
-        if ($this->session->get('auth_code')) {
-            $authCode = $this->session->get('auth_code') ;
+        if ($session->get('auth_code')) {
+            $authCode = $session->get('auth_code') ;
             $client->authenticate($authCode);
             $client->getAccessToken();
             $accessToken = $client->fetchAccessTokenWithAuthCode($authCode);
-            $this->session->set('access_token', $accessToken);
-            $this->importCalendar();
+            $session->set('access_token', $accessToken);
+            // $this->importCalendar();
         } else {
             $authUrl = $client->createAuthUrl();
             $redirectUri = $this->router->generate('google_redirect_for_calendar');
@@ -104,30 +73,25 @@ class CalendarService extends AbstractController
         }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
+        /*
         return view('calendar.createEvent');
+        */
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
-     */
+
+    
     public function store(Request $request)
     {
-        $startDateTime = $request->start_date;
-        $endDateTime = $request->end_date;
-
-        if ($this->session->get('access_token')) {
-            $this->client->setAccessToken($this->session->get('access_token'));
-            $service = new Google_Service_Calendar($this->client);
+        $session = $this->requestStack->getSession();
+        $startDateTime = $request->get('start_date');
+        $endDateTime = $request->get('end_date');
+        $client = new Google_Client();
+        /*
+        if ($session->get('access_token')) {
+            $client->setAccessToken($session->get('access_token'));
+            $service = new Google_Service_Calendar($client);
 
             $calendarId = 'primary';
             $event = new Google_Service_Calendar_Event([
@@ -138,6 +102,7 @@ class CalendarService extends AbstractController
                 'reminders' => ['useDefault' => true],
             ]);
             $results = $service->events->insert($calendarId, $event);
+            
             if (!$results) {
                 return response()->json(['status' => 'error', 'message' => 'Something went wrong']);
             }
@@ -145,21 +110,20 @@ class CalendarService extends AbstractController
         } else {
             return redirect()->route('oauthCallback');
         }
+        */
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param $eventId
-     * @return \Illuminate\Http\Response
-     * @internal param int $id
-     */
+
     public function show($eventId)
     {
-        if ($this->session->get('access_token')) {
-            $this->client->setAccessToken($this->session->get('access_token'));
+        $session = $this->requestStack->getSession();
+        $client = new Google_Client();
+        /*
 
-            $service = new Google_Service_Calendar($this->client);
+        if ($session->get('access_token')) {
+            $client->setAccessToken($session->get('access_token'));
+
+            $service = new Google_Service_Calendar($client);
             $event = $service->events->get('primary', $eventId);
 
             if (!$event) {
@@ -170,32 +134,24 @@ class CalendarService extends AbstractController
         } else {
             return redirect()->route('oauthCallback');
         }
+        */
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param int $id
-     * @return \Illuminate\Http\Response
-     */
     public function edit($id)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param $eventId
-     * @return \Illuminate\Http\Response
-     * @internal param int $id
-     */
+
     public function update(Request $request, $eventId)
     {
-        if ($this->session->get('access_token')) {
-            $this->client->setAccessToken($this->session->get('access_token'));
-            $service = new Google_Service_Calendar($this->client);
+        $session = $this->requestStack->getSession();
+        /*
+        $client = new Google_Client();
+
+        if ($session->get('access_token')) {
+            $client->setAccessToken($session->get('access_token'));
+            $service = new Google_Service_Calendar($client);
 
             $startDateTime = Carbon::parse($request->start_date)->toRfc3339String();
 
@@ -236,26 +192,24 @@ class CalendarService extends AbstractController
         } else {
             return redirect()->route('oauthCallback');
         }
+        */
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param $eventId
-     * @return \Illuminate\Http\Response
-     * @internal param int $id
-     */
     public function destroy($eventId)
     {
-        if ($this->session->get('access_token')) {
-            $this->client->setAccessToken($this->session->get('access_token'));
-            $service = new Google_Service_Calendar($this->client);
+        /*
+        $client = new Google_Client();
+
+        if ($session->get('access_token')) {
+            $client->setAccessToken($session->get('access_token'));
+            $service = new Google_Service_Calendar($client);
 
             $service->events->delete('primary', $eventId);
 
         } else {
             return redirect()->route('oauthCallback');
         }
+        */
     }
 
 }

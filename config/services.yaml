@@ -28,7 +28,7 @@ services:
             # you want to pass the *service* whose id is 'monolog.logger.request',
             # and not just the *string* 'monolog.logger.request'
             $discogsConsumerKey: '%discogs_consumer_key%'
-            $discogs_consumer_secret: '%discogs_consumer_secret%'
+            $discogsConsumerSecret: '%discogs_consumer_secret%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

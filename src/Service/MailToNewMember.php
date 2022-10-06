@@ -7,7 +7,8 @@ use Symfony\Component\Mime\Email;
 
 class MailToNewMember
 {
-    public function sendMailToNewMember(MailerInterface $mailer) {
+    public function sendMailToNewMember(MailerInterface $mailer): void 
+    {
 
         $email = (new Email())
             ->from('p.brickley@hotmail.fr')
@@ -18,5 +19,6 @@ class MailToNewMember
 
         $mailer->send($email);
 
+        return;
     }
 }

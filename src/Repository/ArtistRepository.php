@@ -23,9 +23,12 @@ class ArtistRepository extends ServiceEntityRepository
     }
 
     // among parameters int page, int size
-    public function getArtistsByParams($params) {
+    public function getArtistsByParams(array $params) {
        
         extract($params);
+
+        $page = $page ?? 1;
+        $size = $size ?? 30;
 
         $entityManager = $this->getEntityManager();
         
@@ -41,6 +44,7 @@ class ArtistRepository extends ServiceEntityRepository
             $page, /*page number*/
             $size /*limit per page*/
         );
+
 
         return $pagination;
     }

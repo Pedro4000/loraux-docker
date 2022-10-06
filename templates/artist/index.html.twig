@@ -10,6 +10,8 @@
             <th scope="col">Nom</th>
             <th scope="col">Fully scrapped</th>
             <th scope="col">Fully scrapped date</th>
+            <th scope="col">liens videos</th>
+            <th scope="col">scrapper</th>
             </tr>
         </thead>
         <tbody>
@@ -20,8 +22,12 @@
                     <td>{{ artist.name }}</td>
                     <td>{{ artist.fullyScrapped == 1 ? 'true' : 'false' }}</td>
                     <td>{{ artist.fullyScrapped == 1 ? artist.fullyScrappedDate|date("d/m/Y") : '' }}</td>
-                    <td><a href="{{ path('music.artist.show', {id: artist.id}) }}"><i class="fa fa-info-circle"></i>
-</a></td>
+                    <td>
+                        {% if artist.fullyScrapped == 1 %}
+                            <a href="{{ path('music.artist.show', {id: artist.id}) }}"><i class="fa-solid fa-video text-dark text-lg"></i></a>
+                        {% endif %}    
+                    </td>
+                    <td><i class="fa-solid fa-scroll"></i></td>
                 </tr>
             {% endfor %}
         </tbody>

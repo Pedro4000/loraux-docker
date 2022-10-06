@@ -8,7 +8,6 @@ $(document).ready(function(){
     let direction;
     let videosLinks = [];
 
-    var discogsResponse = $('#discogs-data-div').data('response_discogs').results;
     $('.discogs-research-button').on('click',function(e){
 
         direction = e.target.className.split('-')[0];
@@ -50,53 +49,10 @@ $(document).ready(function(){
 
         });
 
-
-
-    $(document).on('click','.open-links-in-new-tab',function(e){
-        console.log($('.open-links-in-new-tab').data("uri"));
-        let videosArray = $('.open-links-in-new-tab').data('uri');
-        let l;
-        let m=1;
-        j+=5;
-        k+=5;
-        videosArray = videosArray.split(',');
-        console.log(videosArray.length);
-       for (i=0; i < videosArray.length; i++) {
-           win = window.open(videosArray[i]);
-           win.blur()
-           window.focus();
-       }
-        m=1;
-        videosLinks=[];
-        for (l = j; l < k ; l++) {
-            if (m==1) {
-                videosLinks= queryResult[1][l]+',';
-                m=2;
-                continue;
-            }
-            if (l == k-1) {
-                videosLinks = videosLinks+queryResult[1][l];
-            }else{
-                videosLinks = videosLinks+queryResult[1][l]+',';
-            }
-            $('.open-links-in-new-tab').data("uri",videosLinks);
-        }
     });
 
-        $videosss = {
-            0 : "",
-            1 :{
-                0 :
-                {'artists' : "Paul Cut",
-                'videoName' : "Paul Cut - The Joy",
-                'videoUri' : "https://www.youtube.com/watch?v=8lv2hQZVHes"},
-                1:
-                {'artists' : "Paul Cut",
-                'videoName' : "Paul Cut - The World",
-                'videoUri' : "https://www.youtube.com/watch?v=BUFdKuW-QEE"}
-            }
-        }
-
+    $('.controls').on('click',function(e){
+        console.log(videosArray);
 
     });
 

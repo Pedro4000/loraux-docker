@@ -28,14 +28,10 @@ class YoutubeController extends AbstractController
         private Google_Client $client, 
         private ParameterBagInterface $params,
         private RequestStack $requestStack,
-        private $session = $requestStack->getSession(),
         ) { }
 
 
-    /**
-     * @Route("/createYoutubePlaylist", name="createYoutubePlaylist")
-     * @param Request $request
-     */
+
     public function createYoutubePlaylistAction(Request $request)
     {
         $client = new Google_Client();
@@ -53,17 +49,14 @@ class YoutubeController extends AbstractController
 
     }
 
-    /**
-     * @Route("/createYoutubePlaylistCode", name="createYoutubePlaylistCode")
-     * @param Request $request
-     */
     public function createYoutubePlaylistCodeAction(Request $request)
     {
+        $session = $this->requestStack->getSession();
         $videoArrayForYoutube = [];
-        $videosArrayFromDiscogs = $this->session->get('videosToPutInPlaylist');
+        $videosArrayFromDiscogs = $session->get('videosToPutInPlaylist');
         $request->getPathInfo();
         $google_code = $request->query->get('code');
-        $this->session->set('auth_code',$google_code);
+        $session->set('auth_code',$google_code);
 
         $dateTimeNow = new \DateTime();
         $dateTime3339 = $dateTimeNow->format("Y-m-d\TH:i:sP");
@@ -82,19 +75,19 @@ class YoutubeController extends AbstractController
 
         $accessToken = $client->fetchAccessTokenWithAuthCode($google_code);
         $client->setAccessToken($accessToken);
-        $this->session->set('access_token', $accessToken);
+        $session->set('access_token', $accessToken);
 
-        if ($this->session->get('access_token')) {
-            $client->setAccessToken($this->session->get('access_token'));
+        if ($session->get('access_token')) {
+            $client->setAccessToken($session->get('access_token'));
             if ($client->isAccessTokenExpired()) {
                 // Refresh the token if possible, else fetch a new one.
                 if ($client->getRefreshToken()) {
                     $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
                 } else {
-                    $this->oauth($client);
+                    //$this->oauth($client);
                 }
             }
-            $client->setAccessToken($this->session->get('access_token'));
+            $client->setAccessToken($session->get('access_token'));
             $service = new Google_Service_YouTube($client);
             $queryParams = [
                 'mine' => true

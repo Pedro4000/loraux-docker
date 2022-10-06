@@ -39,6 +39,12 @@ p{
 
 }
 
+// here we add stuff to correct and / or improve bootstrap
+
+.text-lg{
+    font-size: 20px !important;
+}
+
 .text-md{
     font-size: 16px !important;
 }
@@ -47,7 +53,7 @@ p{
     font-size: 10px !important;
 }
 
-.text-sm{
+.text-xs{
     font-size: 8px !important;
 }
 
@@ -129,4 +135,17 @@ p{
 
 .w-100{
     width: 100% !important;
+}
+
+.page-link{
+    color: #343a40 !important;
+}
+.page-item.active>.page-link{
+    color: white !important;
+    background-color: var(--bs-gray) !important;
+    border-color: var(--bs-gray) !important;
+}
+
+.video-list.active{
+    color: white !important;
 }

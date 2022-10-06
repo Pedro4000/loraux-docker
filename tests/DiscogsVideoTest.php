@@ -25,18 +25,15 @@ class DiscogsVideoTest extends TestCase
         $labelA = new Label();
         $labelA->setName('un');
 
-        
         $discogsVideo->setUrl('url')
                ->addArtist($artistA)->addArtist($artistB)
                ->setRelease($releaseA)
-               ->setLabel($labelA)
-               ->setLastTimeFullyScrapped($now);
+               ->setLabel($labelA);
 
         $this->assertTrue($discogsVideo->getUrl() == 'url');
         $this->assertTrue($discogsVideo->getArtists() == new ArrayCollection([$artistA, $artistB]));
         $this->assertTrue($discogsVideo->getRelease() == $releaseA);
         $this->assertTrue($discogsVideo->getLabel() == $labelA);
-        $this->assertTrue($discogsVideo->getLastTimeFullyScrapped() == $now);
 
     }
 
@@ -75,14 +72,12 @@ class DiscogsVideoTest extends TestCase
         $discogsVideo->setUrl('url')
                ->addArtist($artistA)->addArtist($artistB)
                ->setRelease($releaseA)
-               ->setLabel($labelA)
-               ->setLastTimeFullyScrapped($now);
+               ->setLabel($labelA);
 
         $this->assertFalse($discogsVideo->getUrl() == 'fakeurl');
         $this->assertFalse($discogsVideo->getArtists() == new ArrayCollection([$artistB, $artistC]));
         $this->assertFalse($discogsVideo->getRelease() == $releaseB);
         $this->assertFalse($discogsVideo->getLabel() == $labelB);
-        $this->assertFalse($discogsVideo->getLastTimeFullyScrapped() == new \DateTimeImmutable('now'));
     }
     
     public function testIsEmpty(): void
@@ -96,7 +91,6 @@ class DiscogsVideoTest extends TestCase
         $this->assertEmpty($discogsVideo->getArtists());
         $this->assertEmpty($discogsVideo->getRelease());
         $this->assertEmpty($discogsVideo->getLabel());
-        $this->assertEmpty($discogsVideo->getLastTimeFullyScrapped());
     }
 
 }

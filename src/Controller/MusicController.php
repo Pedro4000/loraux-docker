@@ -102,7 +102,6 @@ class MusicController extends AbstractController
      * @param MailToNewMember $mailToNewMember
      * @param MailerInterface $mailerInterface
      * @param CalendarService $calendarService
-     * @param ParameterBagInterface $params
      * @return Response
      */
     public function signUpAction(Request $request, MailToNewMember $mailToNewMember, MailerInterface $mailerInterface, CalendarService $calendarService, ManagerRegistry $doctrine)
@@ -130,7 +129,7 @@ class MusicController extends AbstractController
         $finder->in(__DIR__.'/../..');
         $credentialsFiles = $finder->files()->name('credentials.json');
         foreach ($credentialsFiles as $credentialsFile) {
-            $absoluteFilePathCredentials = $credentialsFile->getRealPath();
+            $absoluteFilePathCredentials = $credenstialsFile->getRealPath();
         }*/
 
         return $this->render('signup.html.twig', [
@@ -157,14 +156,28 @@ class MusicController extends AbstractController
     }
 
     #[Route('/music/artist/show/{id}', name: 'music.artist.show')]
-    public function artistShow(int $id, ManagerRegistry $doctrine, ArtistRepository $artistRepository) 
+    public function artistShow(int $id, ManagerRegistry $doctrine, ArtistRepository $artistRepository, DiscogsService $discogsService) 
     {
         $discogsCredentials = 'key='.$this->getParameter('discogs_consumer_key').'&secret='.$this->getParameter('discogs_consumer_secret');
         $baseDiscogsApi = 'https://api.discogs.com/';
 
         $artist = $artistRepository->find($id);
+        $releases = $artist->getReleases();
+        $videos = [];
+        $videosString = '';
+        foreach ($releases as $release) {
+            foreach ($release->getDiscogsVideos() as $video) {
+                $video->youtubeId = $discogsService->getDiscogsVideosURIToYoutubeId($video->getUrl());
+                $videosString .= $video->youtubeId.', ';
+                $videos[] = $video;
+            }
+        }
+        $videosString = substr(trim($videosString), 0 , -1);
+     
         return $this->render('artist/show.html.twig',[
             'artist' => $artist,
+            'videos' => $videos,
+            'videosString' =>  $videosString,
         ]);
     }
 

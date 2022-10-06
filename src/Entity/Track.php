@@ -88,8 +88,9 @@ class Track
             $this->artists->removeElement($artist);
             // set the owning side to null (unless already changed)
             if ($artist->getTracks() === $this) {
-                $artist->setTrack(null);
+                $artist->removeTrack($this);
             }
+            
         }
 
         return $this;

@@ -1,34 +1,45 @@
 {% extends 'layout.html.twig' %}
 
 {% block page_content %}
-    <div class="main_content w-80 flex justify-center p-3">
-    <table class="table">
-        <thead>
-            <tr>
-            <th scope="col">#</th>
-            <th scope="col">Id Discogs</th>
-            <th scope="col">Nom</th>
-            <th scope="col">Fully scrapped</th>
-            <th scope="col">Fully scrapped date</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for artist in artists %}
-                <tr>
-                    <th scope="row">{{ artist.id }}</th>
-                    <td>{{ artist.discogsId }}</td>
-                    <td>{{ artist.name }}</td>
-                    <td>{{ artist.fullyScrapped == 1 ? 'true' : 'false' }}</td>
-                    <td>{{ artist.fullyScrapped == 1 ? artist.fullyScrappedDate|date("d/m/Y") : '' }}</td>
-                    <td><a href="{{ path('music.artist.show', {id: artist.id}) }}"><i class="fa fa-info-circle"></i>
-</a></td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div id"videos-id-strings-div" data-ids="{{ videosString }}"></div>
+    <div class="main_content w-80 p-3">
+    <!-- 1. The <iframe> (and video player) will replace this <div> tag. -->
+    <div class="player-section w-100 d-flex align-items-center flex-column mt-3">
+      <iframe id="ytplayer" type="text/html" width="640" height="360"
+        src=""
+        frameborder="0">
+      </iframe>
+    <div class="controls d-flex justify-content-around w-20 text-lg mt-3">
+    <i class="fas fa-long-arrow-left pr-3 next-video"></i>
+      <p id="video-counter" class="inline"></p>
+    <i class="fas fa-long-arrow-right pl-3 previous-video"></i>
+    </div>
+    <div class="videos-list-div w-80 text-center">
+      <table>
+        <tr>
+          <th>id</th>
+          <th>name</th>
+          <th>url</th>         
+        </tr>
+        {% for video in videos %}
+          <tr class="video-list {{ loop.index == 0 ? 'active' : '' }}">
+            <td class="pr-2">{{ video.youtubeId }}</td>
+            <td class="pr-2">{{ video.name ?? 'pas de nom' }}</td>
+            <td class="pr-2">{{ video.url }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+    </div>
+    </div>
     <div class="navigation">
-        {{ knp_pagination_render(artists) }}
     </div>
     <div>
+    <script>
+      var videosIds = "{{ videosString }}";
+      var videosArray = videosIds.split(', ');
+      var player = document.getElementById('ytplayer');
+      player.src = "https://www.youtube.com/embed/"+videosArray[0]+"?autoplay=1&origin=https://localhost";
+      document.getElementById('video-counter').innerHTML = "video 1/"+videosArray.length;
+    </script>
 
 {% endblock %}
