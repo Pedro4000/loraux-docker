@@ -2,15 +2,15 @@ $(document).ready(function () {
 
     /* =============== For the discogs research slider =============== */
 
-    const discogsArrayLenght = $('.discogs-query-control-pannel').data('elements') - 1;
     let i = 0;
     let j = 0;
     let queryResult;
     let direction;
     let videosLinks = [];
-    var discogsResponse = $('#discogs-data-div').data('response_discogs').results;
- 
+    
     $('.discogs-research-button').on('click', function (e) {
+        let  discogsArrayLenght = discogsArrayLenght ? discogsArrayLenght : $('.discogs-query-control-pannel').data('elements') - 1;
+        var discogsResponse = discogsResponse ? discogsResponse : $('#discogs-data-div').data('response_discogs').results;
 
         direction = e.target.className.split('-')[0];
         if (direction == 'next') {
@@ -45,7 +45,7 @@ $(document).ready(function () {
                 discogsId: id,
                 typeDiscogs: type
             },
-            url: "/ajaxSaveReleasesInDB"
+            url: "/ajaxSaveReleasesInDB",
         }).done(function (response) {
             queryResult = response;
             console.log(response);
@@ -54,10 +54,24 @@ $(document).ready(function () {
 
     /* ======== In the label/artist : index page ======== */
     $('.discogs-scrap').on('click', function(){
-        console.log($(this).closest('span'));
-        let span = $(this).closest('span');
-        let type = span.attr('data-item-type');
-        let id = span.attr('data-item-id');
+        let type = $(this).attr('data-item-type');
+        var discogsId = $(this).attr('data-item-id');
+        $.ajax({
+            data: {
+                discogsId: discogsId,
+                typeDiscogs: type
+            },
+            url: "/ajaxSaveReleasesInDB",
+            beforeSend: function(){
+                $("#scroll-scrap-"+discogsId).addClass('d-none');
+                $("#loader-scrap-"+discogsId).removeClass('d-none');
+            }
+        }).done(function (response) {
+            queryResult = response;
+            console.log(response);
+            $("#scroll-scrap-"+discogsId).removeClass('d-none');
+            $("#loader-scrap-"+discogsId).addClass('d-none');
+        });
     });
 
 
@@ -84,7 +98,7 @@ $(document).ready(function () {
         $('.video-list.active').removeClass('active');
         $(".video-list[data-index='"+index+"']").addClass('active');
         let uri = "https://www.youtube.com/embed/"+(videosData[index].youtubeId)+"?autoplay=1&origin=https://localhost";
-        //$('#ytplayer').attr('src', uri);
+        $('#ytplayer').attr('src', uri);
         let html = 'video '+(index+1)+'/'+($('#video-counter').data('videos-length'));
         $('#video-counter').html(html);
     }

@@ -52,6 +52,29 @@ abstract class DiscogsClass
 
         return $this;
     }
+    public function getNumberScrapped(): ?int
+    {
+        return $this->numberScrapped;
+    }
+
+    public function setNumberScrapped(int $numberScrapped): self
+    {
+        $this->numberScrapped = $numberScrapped;
+
+        return $this;
+    }
+
+    public function getTotalItems(): ?int
+    {
+        return $this->totalItems;
+    }
+
+    public function setTotalItems(int $totalItems): self
+    {
+        $this->totalItems = $totalItems;
+
+        return $this;
+    }
 
     public function getName(): ?string
     {
@@ -92,7 +115,7 @@ abstract class DiscogsClass
 	/**
 	 * @return \DateTimeImmutable
 	 */
-	function getFullyScrappedDate(): \DateTimeImmutable 
+	function getFullyScrappedDate(): ?\DateTimeImmutable 
     {
 		return $this->fullyScrappedDate;
 	}

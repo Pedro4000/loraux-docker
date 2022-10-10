@@ -2,6 +2,10 @@
 
 {% block page_content %}
     <div class="main_content w-80 flex justify-center p-3">
+    <div class="w-100 my-3">
+        <input type="text" id="query-label-index" name="query-label-index" class="w-40 beautiful-text-type">
+        <button type="submit" id="query-label-research-button" class="ml-3 beautiful-button-type">Trouver</button>
+    </div>
     <table class="table">
         <thead>
             <tr>
@@ -29,8 +33,8 @@
                             <a href="{{ path('music.label.show', {id: label.id}) }}"><i class="fa-solid fa-video text-dark text-lg"></i></a>
                         {% endif %}    
                     </td>
-                    <td><i class="fa-solid fa-scroll discogs-scrap"></i></td>
-                    <span class="span-discogs-attributes" data-item-type="label" data-item-id="{{ label.discogsId }}" ></span>                    
+                    <td><i id="scroll-scrap-{{ label.discogsId }}" class="fa-solid fa-scroll discogs-scrap hoover" data-item-type="label" data-item-id="{{ label.discogsId }}"></i>
+                    <img id="loader-scrap-{{ label.discogsId }}" src="{{ asset('images/Loading_icon.gif') }}" alt="#" style="width:20px;" class="d-none"></td>
                 </tr>
             {% endfor %}
         </tbody>

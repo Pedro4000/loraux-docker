@@ -42,13 +42,13 @@
   }
 }
 
-#query-discogs{
+.beautiful-text-type{
   background: rgb(63,94,251);
   background: radial-gradient(circle, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%);
   color:white;
 }
 
-#discogs-query-research-button,#discogs-query-cancel-button{
+#discogs-query-research-button,#discogs-query-cancel-button, .beautiful-button-type{
   background: rgb(238,174,174);
   background: radial-gradient(circle, rgba(238,174,174,1) 0%, rgba(233,148,220,1) 100%);
   border-radius : 3px;

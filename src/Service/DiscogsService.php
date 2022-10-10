@@ -10,6 +10,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use Google\Service\Container\ReleaseChannelConfig;
 use App\Repository\ArtistRepository;
+use phpDocumentor\Reflection\PseudoTypes\True_;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 
@@ -46,7 +47,6 @@ class DiscogsService
             $artist = $artistRepository->findOneBy([ 'discogsId' => $discogsId]);
         };
 
-        
         /*
         // ignore if was checked less than 50 days ago
         if ($artist->isFullyScrapped() && date_diff($artist->getFullyScrappedDate(), $now)->d < 50) {
@@ -71,7 +71,6 @@ class DiscogsService
         for ($currentPage = 1; $currentPage <= $artistReleasesContent['pagination']['pages']; $currentPage++) {
             // if discogs requests limit exceeded then we pause for a minute;
             // if first page then we already have the discogs artist releases response
-            dd($artistReleasesContent);
 
             if ($currentPage != 1) {
                 if($remainingRequests == 1) {
@@ -124,7 +123,7 @@ class DiscogsService
         ]);
     }
 
-    public function scrapDiscogsLabel(int $discogsId):  Label | JsonResponse
+    public function scrapDiscogsLabel(int $discogsId): mixed
     {
         $discogsCredentials = 'key='.$this->discogsConsumerKey.'&secret='.$this->discogsConsumerSecret;
         $baseDiscogsApi = 'https://api.discogs.com/';
@@ -143,11 +142,13 @@ class DiscogsService
         } else {
             $label = $labelRepository->findOneBy([ 'discogsId' => $discogsId]);
         };
-
+        
         // ignore if was checked less than 50 days ago
+        /*
         if ($label->isFullyScrapped() && date_diff($label->getFullyScrappedDate(), $now)->d < 50) {
             return $label;
         }
+        */
 
         $labelReleasesResponse = $guzzleClient->request('GET', $baseDiscogsApi.'labels/'.$discogsId.'/releases?page='.$page.'&'.$discogsCredentials);
         $remainingRequests = intval($labelReleasesResponse->getHeaders()['X-Discogs-Ratelimit-Remaining']);
@@ -157,42 +158,50 @@ class DiscogsService
                 'status' => 'error',
             ]);
         };
+        
 
         $labelReleasesContent = json_decode($labelReleasesResponse->getBody()->getContents(), true);
 
-        dd($remainingRequests);
+        // set total items if wrong or empty
+        if(!$label->getTotalItems() || $label->getTotalItems() != $labelReleasesContent['pagination']['items']) {
+            $label->setTotalItems($labelReleasesContent['pagination']['items']);
+            $em->persist($label);
+            $em->flush();
+        }
+
+        // set fullyscrapped and fullyscrapped date if wrong or empty
+        if(!$label->getFullyScrappedDate() && ($label->getTotalItems() == $labelReleasesContent['pagination']['items'])) {
+            $label->setFullyScrappedDate($now);
+            $label->setFullyScrapped(true);
+            $em->persist($label);
+            $em->flush();
+        }
+
+        $counter = 0;
         for ($currentPage = 1; $currentPage <= $labelReleasesContent['pagination']['pages']; $currentPage++) {
             // if discogs requests limit exceeded then we pause for a minute;
             // if first page then we already have the discogs label releases response
             if ($currentPage != 1) {
-                if($remainingRequests == 1) {
-                    sleep(60);
-                }
                 $labelReleasesResponse = $guzzleClient->request('GET', $baseDiscogsApi.'labels/'.$discogsId.'/releases?page='.$currentPage.'&'.$discogsCredentials);
             };
             
             for ($currentItemInPage = 0; $currentItemInPage < count($labelReleasesContent['releases']); $currentItemInPage++) {
-                die('ok');
+                $counter++;
                 try {
                     $releaseId = $labelReleasesContent['releases'][$currentItemInPage]['id'];
                     if ($releaseRepository->findOneBy(['discogsId' => $releaseId])) {
                         continue;
                     } else {
-    
-                        if ($remainingRequests == 1) {
-                            sleep(60);
-                        }
                         $releaseId = $labelReleasesContent['releases'][$currentItemInPage]['id'];
     
                         $releaseReponse = $guzzleClient->request('GET', $baseDiscogsApi.'releases/'.$releaseId);
                         $releaseContent = json_decode($releaseReponse->getBody()->getContents(),true);
                         $remainingRequests = intval($releaseReponse->getHeaders()['X-Discogs-Ratelimit-Remaining']);
     
-                        dd($releaseContent);
                         self::createRelease($releaseId, 
                                             $releaseContent['title'],
-                                            $releaseContent['released'],
-                                            $releaseContent['videos'],
+                                            $releaseContent['released'] ?? '',
+                                            $releaseContent['videos']?? [],
                                             $releaseContent['labels'],
                                             $releaseContent['artists']);
                     }
@@ -205,10 +214,16 @@ class DiscogsService
             }
         }
 
-        return new JsonResponse([
+        $releases = $label->getReleases();
+        $label->setNumberScrapped(count($releases));
+        $em->persist($label);
+        $em->flush();
+
+        return $response = [
             'status_code' => 200,
             'status' => 'cool',
-        ]);    
+            'counter' => $counter,
+        ];    
     }
 
     public function getDiscogsVideosURIToYoutubeId(string $url){

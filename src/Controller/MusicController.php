@@ -40,7 +40,6 @@ class MusicController extends AbstractController
         $discogsQueryInfos = [];
         $guzzleException='';
 
-
         /* auth of type "https://api.discogs.com/database/search?q=Nirvana&key=foo123&secret=bar456" */
 
         // PREMIERE RECHERCHE AFIN DE TROUVER LOBJET VOULU
@@ -82,12 +81,11 @@ class MusicController extends AbstractController
         // SI ON A DU CONTENU ALORS ON VA LISTER LES RELEASE PAR TYPE DOBJET
         $client = new Client();
         if ($typeDiscogsQuery == 'label') {
-            $label = $discogsService->scrapDiscogsLabel($discogsId);
+            $response = $discogsService->scrapDiscogsLabel($discogsId);
         } elseif ($typeDiscogsQuery == 'artist') {
-            $artist = $discogsService->scrapDiscogsArtist($discogsId);
+            $response = $discogsService->scrapDiscogsArtist($discogsId);
         }
-
-        return new JsonResponse('cool');
+        return new JsonResponse($response);
     }
 
 
@@ -178,9 +176,10 @@ class MusicController extends AbstractController
 
 
     #[Route('/music/label/index', name: 'music.label.index')]
-    public function labelIndex(ManagerRegistry $doctrine, LabelRepository $labelRepository) 
+    public function labelIndex(Request $request, ManagerRegistry $doctrine, LabelRepository $labelRepository) 
     {
-        
+//            dd($request->query->all());
+    
         $page = $_GET['page'] ?? 1;
         $size = 20;
 
@@ -195,7 +194,7 @@ class MusicController extends AbstractController
     
 
 
-    #[Route('/music/label/show', name: 'music.label.show')]
+    #[Route('/music/label/show/{id}', name: 'music.label.show')]
     public function labelShow(int $id, ManagerRegistry $doctrine, LabelRepository $labelRepository, DiscogsService $discogsService) {
 
         $discogsCredentials = 'key='.$this->getParameter('discogs_consumer_key').'&secret='.$this->getParameter('discogs_consumer_secret');

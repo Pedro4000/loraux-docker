@@ -4,18 +4,18 @@
     <div class="main_content p-3">
         <section class="discogs-research-section p-4">
             <p>Ici c'est pour rechercher et puis aller chercher les données depuis Discogs</p>
-            <form method="post" >
+            <form method="get" >
                 <label for="query">Votre recherche</label>
-                <input type="text" id="query-discogs" name="query-discogs">
-                <button type="submit btn btn-light" id="discogs-query-research-button">Cherche ma frye</button>
-                <button type="reset btn btn-light" id="discogs-query-cancel-button">Annule</button>
+                <input type="text" id="query-discogs" name="query-discogs" class="beautiful-text-type">
+                <button type="submit" id="discogs-query-research-button">Cherche ma frye</button>
+                <button type="reset" id="discogs-query-cancel-button">Annule</button>
             </form>
         </section>
         {% if img and responseContents %}
             <section class="discogs-response-section">
                 <div class="discogs-result-display">
                     <div class="stay-put">
-                        <img src="{{ img }}" onerror="this.src='{{ asset('build/images/no_image.jpg') }}'" class="research-logo" data-item-type="{{ responseContents['results'][0]['type']}}"
+                        <img src="{{ img }}" onerror="this.src='{{ asset('build/images/no_image.jpg') }}'" class="research-lsogo" data-item-type="{{ responseContents['results'][0]['type']}}"
                             data-item-id="{{ responseContents['results'][0]['id']}}" >
                         <span class="span-discogs-attributes" data-item-type="{{ responseContents['results'][0]['type']}}" data-item-id="{{ responseContents['results'][0]['id']}}" ></span>                    
                     </div>
