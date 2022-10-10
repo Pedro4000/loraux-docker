@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Persistence\ManagerRegistry;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 use Google\Service\Container\ReleaseChannelConfig;
 use App\Repository\ArtistRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -70,7 +71,8 @@ class DiscogsService
         for ($currentPage = 1; $currentPage <= $artistReleasesContent['pagination']['pages']; $currentPage++) {
             // if discogs requests limit exceeded then we pause for a minute;
             // if first page then we already have the discogs artist releases response
-            
+            dd($artistReleasesContent);
+
             if ($currentPage != 1) {
                 if($remainingRequests == 1) {
                     sleep(60);
@@ -124,7 +126,6 @@ class DiscogsService
 
     public function scrapDiscogsLabel(int $discogsId):  Label | JsonResponse
     {
-
         $discogsCredentials = 'key='.$this->discogsConsumerKey.'&secret='.$this->discogsConsumerSecret;
         $baseDiscogsApi = 'https://api.discogs.com/';
         $page = 1;
@@ -159,7 +160,7 @@ class DiscogsService
 
         $labelReleasesContent = json_decode($labelReleasesResponse->getBody()->getContents(), true);
 
-        
+        dd($remainingRequests);
         for ($currentPage = 1; $currentPage <= $labelReleasesContent['pagination']['pages']; $currentPage++) {
             // if discogs requests limit exceeded then we pause for a minute;
             // if first page then we already have the discogs label releases response
@@ -171,31 +172,35 @@ class DiscogsService
             };
             
             for ($currentItemInPage = 0; $currentItemInPage < count($labelReleasesContent['releases']); $currentItemInPage++) {
-                if ($labelReleasesContent['releases'][$currentItemInPage]['type'] == 'master') {
-                    $releaseId = $labelReleasesContent['releases'][$currentItemInPage]['main_release'];
-                } else {
+                die('ok');
+                try {
                     $releaseId = $labelReleasesContent['releases'][$currentItemInPage]['id'];
-                }
-                if ($releaseRepository->findOneBy(['discogsId' => $releaseId])) {
-                    continue;
-                } else {
-
-                    if ($remainingRequests == 1) {
-                        sleep(60);
+                    if ($releaseRepository->findOneBy(['discogsId' => $releaseId])) {
+                        continue;
+                    } else {
+    
+                        if ($remainingRequests == 1) {
+                            sleep(60);
+                        }
+                        $releaseId = $labelReleasesContent['releases'][$currentItemInPage]['id'];
+    
+                        $releaseReponse = $guzzleClient->request('GET', $baseDiscogsApi.'releases/'.$releaseId);
+                        $releaseContent = json_decode($releaseReponse->getBody()->getContents(),true);
+                        $remainingRequests = intval($releaseReponse->getHeaders()['X-Discogs-Ratelimit-Remaining']);
+    
+                        dd($releaseContent);
+                        self::createRelease($releaseId, 
+                                            $releaseContent['title'],
+                                            $releaseContent['released'],
+                                            $releaseContent['videos'],
+                                            $releaseContent['labels'],
+                                            $releaseContent['artists']);
                     }
-                    $releaseId = $labelReleasesContent['releases'][$currentItemInPage]['id'];
-
-                    $releaseReponse = $guzzleClient->request('GET', $baseDiscogsApi.'releases/'.$releaseId);
-                    $releaseContent = json_decode($releaseReponse->getBody()->getContents(),true);
-                    $remainingRequests = intval($releaseReponse->getHeaders()['X-Discogs-Ratelimit-Remaining']);
-
-
-                    self::createRelease($releaseId, 
-                                        $releaseContent['title'],
-                                        $releaseContent['released'],
-                                        $releaseContent['videos'],
-                                        $releaseContent['labels'],
-                                        $releaseContent['artists']);
+                } catch (ClientException $e) {
+                    if ($e->getResponse()->getStatusCode() == 429) {
+                        $currentItemInPage--;
+                    };
+                    sleep(60);
                 }
             }
         }

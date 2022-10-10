@@ -1,0 +1,43 @@
+{% extends 'layout.html.twig' %}
+
+{% block page_content %}
+    <div class="main_content w-80 flex justify-center p-3">
+    <table class="table">
+        <thead>
+            <tr>
+            <th scope="col">#</th>
+            <th scope="col">Id Discogs</th>
+            <th scope="col">Nom</th>
+            <th scope="col">Progression</th>
+            <th scope="col">Fully scrapped</th>
+            <th scope="col">Fully scrapped date</th>
+            <th scope="col">liens videos</th>
+            <th scope="col">scrapper</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for label in labels %}
+                <tr>
+                    <th scope="row">{{ label.id }}</th>
+                    <td>{{ label.discogsId }}</td>
+                    <td>{{ label.name }}</td>
+                    <td>{{ label.numberScrapped ?? '.' }}/{{ label.totalItems ?? '.' }}</td>
+                    <td>{{ label.fullyScrapped == 1 ? 'true' : 'false' }}</td>
+                    <td>{{ label.fullyScrapped == 1 ? label.fullyScrappedDate|date("d/m/Y") : '' }}</td>
+                    <td>
+                        {% if label.fullyScrapped == 1 %}
+                            <a href="{{ path('music.label.show', {id: label.id}) }}"><i class="fa-solid fa-video text-dark text-lg"></i></a>
+                        {% endif %}    
+                    </td>
+                    <td><i class="fa-solid fa-scroll discogs-scrap"></i></td>
+                    <span class="span-discogs-attributes" data-item-type="label" data-item-id="{{ label.discogsId }}" ></span>                    
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="navigation">
+        {{ knp_pagination_render(labels) }}
+    </div>
+    <div>
+
+{% endblock %}

@@ -5,6 +5,8 @@ namespace App\Repository;
 use App\Entity\Label;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Knp\Component\Pager\PaginatorInterface;
+
 
 /**
  * @method Label|null find($id, $lockMode = null, $lockVersion = null)
@@ -14,9 +16,35 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class LabelRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(
+        private ManagerRegistry $registry,
+        private PaginatorInterface $paginator) 
     {
         parent::__construct($registry, Label::class);
+    }
+
+    public function getLabelsByParams(array $params) {
+       
+        extract($params);
+
+        $page = $page ?? 1;
+        $size = $size ?? 30;
+
+        $entityManager = $this->getEntityManager();
+        
+        $query = $entityManager->createQuery(
+            'SELECT a
+            FROM App\Entity\Label a
+            ORDER BY a.id
+            '
+        );
+        
+        $pagination = $this->paginator->paginate(
+            $query, /* query NOT result */
+            $page, /*page number*/
+            $size /*limit per page*/
+        );
+        return $pagination;
     }
 
     // /**

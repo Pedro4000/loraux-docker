@@ -21,6 +21,12 @@ abstract class DiscogsClass
     #[ORM\Column(length: 255)]
     protected ?string $name = null;
 
+    #[ORM\Column(nullable: true)]
+    protected ?int $numberScrapped = null;
+
+    #[ORM\Column(nullable: true)]
+    protected ?int $totalItems = null;
+
     #[ORM\Column]
     protected ?bool $fullyScrapped = null;
 

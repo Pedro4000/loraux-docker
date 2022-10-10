@@ -1,4 +1,10 @@
 @import "~bootstrap/scss/bootstrap";
+// Required
+@import "node_modules/bootstrap/scss/functions";
+@import "node_modules/bootstrap/scss/variables";
+@import "node_modules/bootstrap/scss/mixins";
+
+
 
 
 @font-face {
@@ -148,4 +154,15 @@ p{
 
 .video-list.active{
     color: white !important;
+    background-color: var(--bs-gray) !important;
+    border-color: var(--bs-gray) !important;
+}
+
+.video-table{
+    max-height: 35vh;
+    overflow-y: scroll;
+}
+
+.hoover{
+    cursor: pointer;
 }

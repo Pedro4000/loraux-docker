@@ -9,18 +9,13 @@ use Doctrine\Persistence\ManagerRegistry;
 use Google_Client;
 use Google_Service_Calendar;
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\ClientException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\{RequestStack, Request, JsonResponse};
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
-use Google\Service\ToolResults\PendingGoogleUpdateInsight;
-use App\Entity\PendingYoutubeTask;
-use Symfony\Component\Form\ChoiceList\ArrayChoiceList;
-use Doctrine\Common\Collections\ArrayCollection;
-use App\Repository\ArtistRepository;
+use App\Repository\{ArtistRepository, LabelRepository};
 
 class MusicController extends AbstractController
 {
@@ -174,7 +169,7 @@ class MusicController extends AbstractController
         }
         $videosString = substr(trim($videosString), 0 , -1);
      
-        return $this->render('artist/show.html.twig',[
+        return $this->render('video/player.html.twig',[
             'artist' => $artist,
             'videos' => $videos,
             'videosString' =>  $videosString,
@@ -183,8 +178,47 @@ class MusicController extends AbstractController
 
 
     #[Route('/music/label/index', name: 'music.label.index')]
-    public function labelIndex() {
-        die('ok');
+    public function labelIndex(ManagerRegistry $doctrine, LabelRepository $labelRepository) 
+    {
+        
+        $page = $_GET['page'] ?? 1;
+        $size = 20;
+
+        $params = compact('page', 'size');
+
+        $labels = $labelRepository->getLabelsByParams($params);
+
+        return $this->render('label/index.html.twig',[
+            'labels' => $labels,
+        ]);
+    }
+    
+
+
+    #[Route('/music/label/show', name: 'music.label.show')]
+    public function labelShow(int $id, ManagerRegistry $doctrine, LabelRepository $labelRepository, DiscogsService $discogsService) {
+
+        $discogsCredentials = 'key='.$this->getParameter('discogs_consumer_key').'&secret='.$this->getParameter('discogs_consumer_secret');
+        $baseDiscogsApi = 'https://api.discogs.com/';
+
+        $label = $labelRepository->find($id);
+        $releases = $label->getReleases();
+        $videos = [];
+        $videosString = '';
+        foreach ($releases as $release) {
+            foreach ($release->getDiscogsVideos() as $video) {
+                $video->youtubeId = $discogsService->getDiscogsVideosURIToYoutubeId($video->getUrl());
+                $videosString .= $video->youtubeId.', ';
+                $videos[] = $video;
+            }
+        }
+        $videosString = substr(trim($videosString), 0 , -1);
+     
+        return $this->render('video/player.html.twig',[
+            'label' => $label,
+            'videos' => $videos,
+            'videosString' =>  $videosString,
+        ]);
     }
     
 

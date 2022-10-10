@@ -44,8 +44,6 @@ class ArtistRepository extends ServiceEntityRepository
             $page, /*page number*/
             $size /*limit per page*/
         );
-
-
         return $pagination;
     }
 

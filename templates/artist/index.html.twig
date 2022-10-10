@@ -8,6 +8,7 @@
             <th scope="col">#</th>
             <th scope="col">Id Discogs</th>
             <th scope="col">Nom</th>
+            <th scope="col">Progression</th>
             <th scope="col">Fully scrapped</th>
             <th scope="col">Fully scrapped date</th>
             <th scope="col">liens videos</th>
@@ -20,6 +21,7 @@
                     <th scope="row">{{ artist.id }}</th>
                     <td>{{ artist.discogsId }}</td>
                     <td>{{ artist.name }}</td>
+                    <td>{{ artist.numberScrapped ?? '.' }}/{{ artist.totalItems ?? '.' }}</td>
                     <td>{{ artist.fullyScrapped == 1 ? 'true' : 'false' }}</td>
                     <td>{{ artist.fullyScrapped == 1 ? artist.fullyScrappedDate|date("d/m/Y") : '' }}</td>
                     <td>
