@@ -2,7 +2,7 @@
 
 namespace App\Service ;
 
-use App\Entity\{Artist, Label, Track, Release, DiscogsVideo};
+use App\Entity\{Artist, DiscogsClass, Label, Track, Release, DiscogsVideo};
 use Carbon\Carbon;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Persistence\ManagerRegistry;
@@ -219,10 +219,11 @@ class DiscogsService
         $em->persist($label);
         $em->flush();
 
-        return $response = [
+        return [
             'status_code' => 200,
             'status' => 'cool',
             'counter' => $counter,
+            'discogsObject' => self::formatDiscogsObjectToArrayForAjaxResponse($label),
         ];    
     }
 
@@ -354,5 +355,21 @@ class DiscogsService
             $releaseInfos['videos']=null;
         }
         return $releaseInfos;
+    }
+
+    // format db object to simple array
+    public function formatDiscogsObjectToArrayForAjaxResponse(DiscogsClass $discogsClassLabelOrArtist): ?array
+    {
+        $discogsObject = [
+            'id' => $discogsClassLabelOrArtist->getId(),
+            'discogsId' => $discogsClassLabelOrArtist->getDiscogsId(),
+            'name' => $discogsClassLabelOrArtist->getName(),
+            'numberScrapped' => $discogsClassLabelOrArtist->getNumberScrapped(),
+            'totalItems' => $discogsClassLabelOrArtist->getTotalItems(),
+            'fullyScrapped' => $discogsClassLabelOrArtist->isFullyScrapped(),
+            'fullyScrappedDate' => $discogsClassLabelOrArtist->getFullyScrappedDate()->format('d/m/Y'),
+        ];
+
+        return $discogsObject;
     }
 }

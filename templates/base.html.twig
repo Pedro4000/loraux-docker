@@ -4,10 +4,16 @@
         <meta charset="UTF-8">
         <title>{% block title %}Loraux{% endblock %}</title>
           <link rel="icon" type="image/jpeg" href="/images/oeuf.jpeg">
+        <script src="https://kit.fontawesome.com/7641f4cf6b.js" crossorigin="anonymous"></script> 
+        <script src="{{ asset('jquery/jquery-3.6.1.min.js') }}"></script>
+        <script src="{{ asset('bootstrap/dist/js/bootstrap.min.js') }}"></script>
+        <link rel="stylesheet" href="{{ asset('bootstrap/dist/css/bootstrap.min.css') }}">
         {% block stylesheets %}
-            <script src="https://kit.fontawesome.com/7641f4cf6b.js" crossorigin="anonymous"></script> 
-            {{ encore_entry_link_tags('app') }}
             <link rel="stylesheet" type="text/css" href="build/app.css"/>
+            {{ encore_entry_link_tags('app') }}
+        {% endblock %}
+        {% block javascripts %}
+            {{ encore_entry_script_tags('app') }}
         {% endblock %}
     </head>
     <body>
@@ -18,8 +24,6 @@
                 {% endblock %}
             </div>
         {% endblock %}
+
     </body>
-    {% block javascripts %}
-        {{ encore_entry_script_tags('app') }}
-    {% endblock %}
 </html>

@@ -16,6 +16,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
 use App\Repository\{ArtistRepository, LabelRepository};
+use Symfony\Component\Form\Extension\Core\Type\{NumberType, SubmitType};
 
 class MusicController extends AbstractController
 {
@@ -183,15 +184,40 @@ class MusicController extends AbstractController
         $page = $_GET['page'] ?? 1;
         $size = 20;
 
+        $bla = new Label();
+        $deleteDiscogsObjectForm = $this->createFormBuilder($bla)
+            ->setAction($this->generateUrl('music.label.delete'))
+            ->setMethod('POST')
+            ->add('id', NumberType::class)
+            ->add('save', SubmitType::class)
+            ->getForm();
+
         $params = compact('page', 'size');
 
         $labels = $labelRepository->getLabelsByParams($params);
 
         return $this->render('label/index.html.twig',[
             'labels' => $labels,
+            'deleteDiscogsObjectForm' => $deleteDiscogsObjectForm->createView(),
         ]);
     }
+
+    #[Route('/music/label/delete', name: 'music.label.delete')]
+    public function labelDelete(Request $request, ManagerRegistry $doctrine, LabelRepository $labelRepository) 
+    {
+//            dd($request->query->all());
     
+        $page = $_GET['page'] ?? 1;
+        $size = 20;
+
+        $params = compact('page', 'size');
+
+        $labels = $labelRepository->getLabelsByParams($params);
+
+        return $this->render('label/delete.html.twig',[
+            'labels' => $labels,
+        ]);
+    }    
 
 
     #[Route('/music/label/show/{id}', name: 'music.label.show')]

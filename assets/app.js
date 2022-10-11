@@ -6,10 +6,10 @@
  */
 
 // any CSS you import will output into a single css file (app.css in this case)
-import $ from 'jquery';
 
 import './js/discogs.js'
 
+import './bootstrap';
 import './styles/app.css';
 import './css/app.scss';
 import './css/discogs.scss';

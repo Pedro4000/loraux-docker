@@ -68,9 +68,14 @@ $(document).ready(function () {
             }
         }).done(function (response) {
             queryResult = response;
-            console.log(response);
+            var discogsObject = response.discogsObject;
+            console.log(discogsObject, discogsObject.numberScapped);
             $("#scroll-scrap-"+discogsId).removeClass('d-none');
             $("#loader-scrap-"+discogsId).addClass('d-none');
+            $("#index-progression-"+discogsId).html(discogsObject.numberScrapped+'/'+discogsObject.totalItems);
+            $("#index-scrapped-"+discogsId).html('true');
+            $("#index-scrapped-date-"+discogsId).html(discogsObject.fullyScrappedDate);
+            $("#index-videos-link-"+discogsId).find("a").removeClass("d-none");
         });
     });
 
@@ -102,9 +107,6 @@ $(document).ready(function () {
         let html = 'video '+(index+1)+'/'+($('#video-counter').data('videos-length'));
         $('#video-counter').html(html);
     }
-
-    
-    
 
 
 });
