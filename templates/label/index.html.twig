@@ -2,67 +2,64 @@
 
 {% block page_content %}
     <div class="main_content w-80 flex justify-center p-3">
-    <div class="w-100 my-3">
-        <input type="text" id="query-label-index" name="query-label-index" class="w-40 beautiful-text-type">
-        <button type="submit" id="query-label-research-button" class="ml-3 beautiful-button-type">Trouver</button>
-    </div>
-    <table class="table">
-        <thead>
-            <tr>
-            <th scope="col">#</th>
-            <th scope="col">Id Discogs</th>
-            <th scope="col">Nom</th>
-            <th scope="col">Progression</th>
-            <th scope="col">Fully scrapped</th>
-            <th scope="col">Fully scrapped date</th>
-            <th scope="col" class="text-center">liens videos</th>
-            <th scope="col" class="text-center" >scrapper</th>
-            <th scope="col" class="text-center">supprimer</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for label in labels %}
-                <tr>
-                    <th scope="row">{{ label.id }}</th>
-                    <td>{{ label.discogsId }}</td>
-                    <td>{{ label.name }}</td>
-                    <td id="index-progression-{{ label.discogsId }}">{{ label.numberScrapped ?? '.' }}/{{ label.totalItems ?? '.' }}</td>
-                    <td id="index-scrapped-{{ label.discogsId }}">{{ label.fullyScrapped == 1 ? 'true' : 'false' }}</td>
-                    <td id="index-scrapped-date-{{ label.discogsId }}">{{ label.fullyScrapped == 1 ? label.fullyScrappedDate|date("d/m/Y") : '' }}</td>
-                    <td id="index-videos-link-{{ label.discogsId }}" class="text-center">
-                        <a href="{{ path('music.label.show', {id: label.id}) }}"><i class="fa-solid fa-video text-dark text-lg {{ label.fullyScrapped == 1 ? '' : 'd-none' }}"></i></a>
-                    </td>
-                    <td class="text-center">
-                        <i id="scroll-scrap-{{ label.discogsId }}" class="fa-solid fa-scroll discogs-scrap hoover" data-item-type="label" data-item-id="{{ label.discogsId }}"></i>
-                        <img id="loader-scrap-{{ label.discogsId }}" src="{{ asset('images/Loading_icon.gif') }}" alt="#" style="width:20px;" class="d-none">
-                    </td>
-                    <td class="text-center"><i class="fa-sharp fa-solid fa-trash text-danger hoover" data-id="{{ label.id }}" data-toggle="modal" data-target="#deleteDiscogsObject"></i></td>
-                </tr>
-            {% endfor %}
-        </tbody>
+      <div class="w-100 my-3">
+          <input type="text" id="query-label-index" name="query-label-index" class="w-40 beautiful-text-type">
+          <button type="submit" id="query-label-research-button" class="ml-3 beautiful-button-type">Trouver</button>
+      </div>
+      <table class="table">
+          <thead>
+              <tr>
+              <th scope="col">#</th>
+              <th scope="col">Id Discogs</th>
+              <th scope="col">Nom</th>
+              <th scope="col">Progression</th>
+              <th scope="col">Fully scrapped</th>
+              <th scope="col">Fully scrapped date</th>
+              <th scope="col" class="text-center">liens videos</th>
+              <th scope="col" class="text-center" >scrapper</th>
+              <th scope="col" class="text-center">supprimer</th>
+              </tr>
+          </thead>
+          <tbody>
+              {% for label in labels %}
+                  <tr>
+                      <th scope="row">{{ label.id }}</th>
+                      <td>{{ label.discogsId }}</td>
+                      <td>{{ label.name }}</td>
+                      <td id="index-progression-{{ label.discogsId }}">{{ label.numberScrapped ?? '.' }}/{{ label.totalItems ?? '.' }}</td>
+                      <td id="index-scrapped-{{ label.discogsId }}">{{ label.fullyScrapped == 1 ? 'true' : 'false' }}</td>
+                      <td id="index-scrapped-date-{{ label.discogsId }}">{{ label.fullyScrapped == 1 ? label.fullyScrappedDate|date("d/m/Y") : '' }}</td>
+                      <td id="index-videos-link-{{ label.discogsId }}" class="text-center">
+                          <a href="{{ path('music.label.show', {id: label.id}) }}"><i class="fa-solid fa-video text-dark text-lg {{ label.fullyScrapped == 1 ? '' : 'd-none' }}"></i></a>
+                      </td>
+                      <td class="text-center">
+                          <i id="scroll-scrap-{{ label.discogsId }}" class="fa-solid fa-scroll discogs-scrap hoover" data-item-type="label" data-item-id="{{ label.discogsId }}"></i>
+                          <img id="loader-scrap-{{ label.discogsId }}" src="{{ asset('images/Loading_icon.gif') }}" alt="#" style="width:20px;" class="d-none">
+                      </td>
+                      <td class="text-center"><i class="fa-sharp fa-solid fa-trash text-danger hoover" data-id="{{ label.id }}" data-toggle="modal" data-target="#deleteDiscogsObject"></i></td>
+                  </tr>
+              {% endfor %}
+          </tbody>
 
-    </table>
-    <div class="navigation">
-        {{ knp_pagination_render(labels) }}
-    </div>
+      </table>
+      <div class="navigation">
+          {{ knp_pagination_render(labels) }}
+      </div>
     <div>
-
-
-{{ form(deleteDiscogsObjectForm) }}
 
 <!-- Modal -->
 <div class="modal fade" id="deleteDiscogsObject" tabindex="-1" role="dialog" aria-labelledby="deleteDiscogsObjectLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="deleteDiscogsObjectLabel">Supprimer ?</h5>
+        <h5 class="modal-title" id="deleteDiscogsObjectLabel">Supprimer <span class="modal-label-name"></span> ?</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
-        <button type="button" class="btn btn-danger">Supprimer</button>
+        <button id="delete-label-button" type="button" data-id="" class="btn btn-danger">Supprimer</button>
       </div>
     </div>
   </div>

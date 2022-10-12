@@ -108,5 +108,23 @@ $(document).ready(function () {
         $('#video-counter').html(html);
     }
 
+    /* ================ Ajax for label deletion ================ */
+
+    $('.discogs-scrap').on('click', function(){
+        var id = $(this).attr('data-item-id');
+        console.log(id);
+        $.ajax({
+            method: 'delete',
+            data: {
+                id: labelId,
+            },
+            url: "/music/label/delete",
+        }).done(function (response) {
+            if (response.code == 200) {
+                console.log(response, 'ok');
+            }
+        });
+    });
+
 
 });
