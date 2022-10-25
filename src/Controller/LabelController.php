@@ -19,8 +19,8 @@ class LabelController extends AbstractController
     public function index(Request $request, ManagerRegistry $doctrine, LabelRepository $labelRepository) 
     {
 //      dd($request->query->all());
-    
-        $page = $_GET['page'] ?? 1;
+
+$page = $_GET['page'] ?? 1;
         $size = 20;
 
         $params = compact('page', 'size');
@@ -33,7 +33,7 @@ class LabelController extends AbstractController
     }
  
     
-    #[Route('/{id}', name: 'show', methods: ['GET'])]
+    #[Route('/{id}', name: 'show')]
     public function show(string $id, ManagerRegistry $doctrine, LabelRepository $labelRepository, DiscogsService $discogsService) 
     {
         $discogsCredentials = 'key='.$this->getParameter('discogs_consumer_key').'&secret='.$this->getParameter('discogs_consumer_secret');

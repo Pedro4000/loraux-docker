@@ -29,9 +29,10 @@ class ArtistController extends AbstractController
         private RequestStack $requestStack
     ) { }
 
-    #[Route('/', name: 'index')]
+    #[Route('/index', name: 'index')]
     public function artistIndex(ManagerRegistry $doctrine, ArtistRepository $artistRepository) 
     {
+        die('ok');
         
         $page = $_GET['page'] ?? 1;
         $size = 20;
@@ -45,8 +46,8 @@ class ArtistController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'music.artist.show')]
-    public function artistShow(int $id, ManagerRegistry $doctrine, ArtistRepository $artistRepository, DiscogsService $discogsService) 
+    #[Route('/{id}', name: 'show')]
+    public function artistShow(string $id, ManagerRegistry $doctrine, ArtistRepository $artistRepository, DiscogsService $discogsService) 
     {
         $discogsCredentials = 'key='.$this->getParameter('discogs_consumer_key').'&secret='.$this->getParameter('discogs_consumer_secret');
         $baseDiscogsApi = 'https://api.discogs.com/';
