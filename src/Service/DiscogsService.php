@@ -196,6 +196,7 @@ class DiscogsService
     
                         $releaseReponse = $guzzleClient->request('GET', $baseDiscogsApi.'releases/'.$releaseId);
                         $releaseContent = json_decode($releaseReponse->getBody()->getContents(),true);
+
                         $remainingRequests = intval($releaseReponse->getHeaders()['X-Discogs-Ratelimit-Remaining']);
     
                         self::createRelease($releaseId, 
@@ -339,6 +340,7 @@ class DiscogsService
         foreach($videos as $video) {
             $discogsVideo = new DiscogsVideo();
             $discogsVideo->setUrl($video['uri']);
+            $discogsVideo->setName($video['title']);
             $em->persist($discogsVideo);
             $release->addDiscogsVideo($discogsVideo);
         }
