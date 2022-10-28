@@ -32,8 +32,6 @@ class ArtistController extends AbstractController
     #[Route('/index', name: 'index')]
     public function artistIndex(ManagerRegistry $doctrine, ArtistRepository $artistRepository) 
     {
-        die('ok');
-        
         $page = $_GET['page'] ?? 1;
         $size = 20;
 

@@ -30,15 +30,18 @@ class LabelRepository extends ServiceEntityRepository
         $page = $page ?? 1;
         $size = $size ?? 30;
 
+
         $entityManager = $this->getEntityManager();
-        
-        $query = $entityManager->createQuery(
-            'SELECT a
-            FROM App\Entity\Label a
-            ORDER BY a.id
-            '
-        );
-        
+
+        $qb = $this->createQueryBuilder('l');
+
+        if(isset($query) && $query != "") {
+            $qb->where('LOWER(l.name) LIKE :query');
+            $qb->setParameter('query', '%'.strtolower($query).'%');
+        }
+
+        $query = $qb->getQuery();
+
         $pagination = $this->paginator->paginate(
             $query, /* query NOT result */
             $page, /*page number*/

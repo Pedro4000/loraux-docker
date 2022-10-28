@@ -3,13 +3,14 @@
 namespace App\Controller;
 
 use App\Entity\{Artist, Label, Release, User};
-use App\Service\{DiscogsService};
+use App\Form\SearchType;
+use App\Service\{DiscogsService, GeneralService};
+use App\Repository\{ArtistRepository, LabelRepository};
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\{NumberType, SubmitType, TextType};
 use Symfony\Component\HttpFoundation\{RequestStack, Request, JsonResponse};
 use Symfony\Component\Routing\Annotation\Route;
-use App\Repository\{ArtistRepository, LabelRepository};
-use Symfony\Component\Form\Extension\Core\Type\{NumberType, SubmitType};
 
 #[Route('/music/label', name: 'music.label.')]
 class LabelController extends AbstractController
@@ -18,17 +19,26 @@ class LabelController extends AbstractController
     #[Route('/index', name: 'index', methods: ['GET', 'HEAD'])]
     public function index(Request $request, ManagerRegistry $doctrine, LabelRepository $labelRepository) 
     {
-//      dd($request->query->all());
+        //      dd($request->query->all());
 
-$page = $_GET['page'] ?? 1;
+
+        $page = $_GET['page'] ?? 1;
         $size = 20;
 
-        $params = compact('page', 'size');
+        $searchForm = $this->createForm(SearchType::class, null);
 
+        $searchForm->handleRequest($request);
+        if ($searchForm->isSubmitted() && $searchForm->isValid()) {
+            $query = $searchForm->getData()['query'];
+            $params = compact('page', 'size', 'query');
+        } else {
+            $params = compact('page', 'size');
+        }
         $labels = $labelRepository->getLabelsByParams($params);
 
-        return $this->render('label/index.html.twig',[
+        return $this->renderForm('label/index.html.twig',[
             'labels' => $labels,
+            'searchForm' => $searchForm,
         ]);
     }
  
