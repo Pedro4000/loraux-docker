@@ -2,6 +2,12 @@
 
 {% block page_content %}
     <div class="main_content w-80 flex justify-center p-3">
+        <div class="w-100 my-3">
+            {{ form_start(searchForm, {'attr': {'novalidate': 'novalidate'}}) }}
+                {{ form_widget(searchForm.query) }}
+                {{ form_widget(searchForm.trouver) }}
+            {{ form_end(searchForm) }}
+        </div>
     <table class="table">
         <thead>
             <tr>

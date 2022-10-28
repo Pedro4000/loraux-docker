@@ -24,7 +24,7 @@ class LabelRepository extends ServiceEntityRepository
     }
 
     public function getLabelsByParams(array $params) {
-       
+
         extract($params);
 
         $page = $page ?? 1;

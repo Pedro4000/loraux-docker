@@ -72,8 +72,6 @@ class LabelController extends AbstractController
     #[Route('/delete', name: 'delete', methods: ['DELETE'])]
     public function delete(Request $request, ManagerRegistry $doctrine, LabelRepository $labelRepository) 
     {
-        dd($request->query->all());
-
         
     }    
     

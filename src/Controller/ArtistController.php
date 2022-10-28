@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\{Artist, Label, Release, User};
+use App\Form\SearchType;
 use App\Form\UserType;
 use App\Service\{CalendarService, DiscogsService, MailToNewMember};
 use Doctrine\Persistence\ManagerRegistry;
@@ -28,19 +29,30 @@ class ArtistController extends AbstractController
         private DiscogsService $discogsService, 
         private RequestStack $requestStack
     ) { }
-
-    #[Route('/index', name: 'index')]
-    public function artistIndex(ManagerRegistry $doctrine, ArtistRepository $artistRepository) 
+    
+    #[Route('/index', name: 'index', methods: ['GET', 'HEAD'])]
+    public function index(Request $request, ManagerRegistry $doctrine, ArtistRepository $artistRepository) 
     {
+        //      dd($request->query->all());
+
+
         $page = $_GET['page'] ?? 1;
         $size = 20;
 
-        $params = compact('page', 'size');
+        $searchForm = $this->createForm(SearchType::class, null);
 
+        $searchForm->handleRequest($request);
+        if ($searchForm->isSubmitted() && $searchForm->isValid()) {
+            $query = $searchForm->getData()['query'];
+            $params = compact('page', 'size', 'query');
+        } else {
+            $params = compact('page', 'size');
+        }
         $artists = $artistRepository->getArtistsByParams($params);
 
-        return $this->render('artist/index.html.twig',[
+        return $this->renderForm('artist/index.html.twig',[
             'artists' => $artists,
+            'searchForm' => $searchForm,
         ]);
     }
 

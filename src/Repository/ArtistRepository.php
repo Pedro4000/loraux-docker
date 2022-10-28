@@ -16,29 +16,31 @@ use Knp\Component\Pager\PaginatorInterface;
 class ArtistRepository extends ServiceEntityRepository
 {
     public function __construct(
-        private ManagerRegistry $registry, 
-        private PaginatorInterface $paginator)
+        private ManagerRegistry $registry,
+        private PaginatorInterface $paginator) 
     {
         parent::__construct($registry, Artist::class);
     }
 
-    // among parameters int page, int size
     public function getArtistsByParams(array $params) {
-       
+
         extract($params);
 
         $page = $page ?? 1;
         $size = $size ?? 30;
 
+
         $entityManager = $this->getEntityManager();
-        
-        $query = $entityManager->createQuery(
-            'SELECT a
-            FROM App\Entity\Artist a
-            ORDER BY a.id
-            '
-        );
-        
+
+        $qb = $this->createQueryBuilder('a');
+
+        if(isset($query) && $query != "") {
+            $qb->where('LOWER(a.name) LIKE :query');
+            $qb->setParameter('query', '%'.strtolower($query).'%');
+        }
+
+        $query = $qb->getQuery();
+
         $pagination = $this->paginator->paginate(
             $query, /* query NOT result */
             $page, /*page number*/
@@ -46,6 +48,7 @@ class ArtistRepository extends ServiceEntityRepository
         );
         return $pagination;
     }
+
 
     // /**
     //  * @return Artist[] Returns an array of Artist objects

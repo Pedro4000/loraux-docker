@@ -133,48 +133,6 @@ class MusicController extends AbstractController
     }
 
 
-    #[Route('/music/artist/index', name: 'music.artist.index')]
-    public function artistIndex(ManagerRegistry $doctrine, ArtistRepository $artistRepository) 
-    {
-        
-        $page = $_GET['page'] ?? 1;
-        $size = 20;
-
-        $params = compact('page', 'size');
-
-        $artists = $artistRepository->getArtistsByParams($params);
-
-        return $this->render('artist/index.html.twig',[
-            'artists' => $artists,
-        ]);
-    }
-
-    #[Route('/music/artist/show/{id}', name: 'music.artist.show')]
-    public function artistShow(int $id, ManagerRegistry $doctrine, ArtistRepository $artistRepository, DiscogsService $discogsService) 
-    {
-        $discogsCredentials = 'key='.$this->getParameter('discogs_consumer_key').'&secret='.$this->getParameter('discogs_consumer_secret');
-        $baseDiscogsApi = 'https://api.discogs.com/';
-
-        $artist = $artistRepository->find($id);
-        $releases = $artist->getReleases();
-        $videos = [];
-        $videosString = '';
-        foreach ($releases as $release) {
-            foreach ($release->getDiscogsVideos() as $video) {
-                $video->youtubeId = $discogsService->getDiscogsVideosURIToYoutubeId($video->getUrl());
-                $videosString .= $video->youtubeId.', ';
-                $videos[] = $video;
-            }
-        }
-        $videosString = substr(trim($videosString), 0 , -1);
-     
-        return $this->render('video/player.html.twig',[
-            'artist' => $artist,
-            'videos' => $videos,
-            'videosString' =>  $videosString,
-        ]);
-    }
-
     /**
      * @Route("/google_redirect_for_calendar", name="google_redirect_for_calendar")
      * @param Request $request
