@@ -76,6 +76,7 @@ class MusicController extends AbstractController
         $discogsId = $request->query->get('discogsId');
         $em = $doctrine->getManager();
         $typeDiscogsQuery = $request->query->get('typeDiscogs');
+
         $session = $requestStack->getSession();
         $session->set('videosToPutInPlaylist','');
 

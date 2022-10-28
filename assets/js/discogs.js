@@ -37,9 +37,11 @@ $(document).ready(function () {
 
     /* ====== In the landing page ==========*/
     $('.good-answer-ma-man').on('click', function (e) {
+        
+        let type = $('.span-discogs-attributes').attr('data-item-type');
+        let id = $('.span-discogs-attributes').attr('data-item-id');
 
-        let type = $('.discogs-attributes').attr('data-item-type');
-        let id = $('.discogs-attributes').attr('data-item-id');
+        console.log(type, id);
         $.ajax({
             data: {
                 discogsId: id,
